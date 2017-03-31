@@ -1,6 +1,6 @@
 package com.hiczp.bilibili.live.danmuji.gui;
 
-import com.hiczp.bilibili.live.danmuji.NetThread;
+import com.hiczp.bilibili.live.danmuji.NetRunnable;
 
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
@@ -20,7 +20,7 @@ public class MainForm implements Callable {
     private JButton stopButton;
     private JPanel barJPanel;
 
-    private Thread netThread;
+    private NetRunnable netRunnable;
 
     private MainForm() {
         //textField 无字时禁用 Start 按钮
@@ -40,15 +40,16 @@ public class MainForm implements Callable {
             startButton.setEnabled(false);
             textField.setEnabled(false);
 
-            netThread = new Thread(new NetThread(textArea, this));
-            netThread.start();
+            netRunnable = new NetRunnable(textField.getText(), textArea, this);
+            new Thread(netRunnable).start();
 
             stopButton.setEnabled(true);
         });
 
         //单击 Stop 按钮
         stopButton.addActionListener(actionEvent -> {
-
+            stopButton.setEnabled(false);
+            netRunnable.exit();
         });
 
         //双击 textArea 隐藏 barPanel

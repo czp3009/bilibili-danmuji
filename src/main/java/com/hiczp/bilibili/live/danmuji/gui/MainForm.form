@@ -58,7 +58,9 @@
             <preferred-size width="-1" height="250"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <horizontalScrollBarPolicy value="30"/>
+        </properties>
         <border type="none"/>
         <children>
           <component id="598ed" class="javax.swing.JTextArea" binding="textArea">

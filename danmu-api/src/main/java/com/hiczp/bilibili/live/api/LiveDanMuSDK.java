@@ -10,6 +10,16 @@ public class LiveDanMuSDK {
     private Socket socket;
 
     public void connect(String serverAddress) throws IOException {
-        socket = new Socket(serverAddress, 0);
+        close();
+        socket = new Socket(serverAddress, 9090);
+
+    }
+
+    public void close() throws IOException {
+        if (socket != null) {
+            if (!socket.isClosed()) {
+                socket.close();
+            }
+        }
     }
 }
