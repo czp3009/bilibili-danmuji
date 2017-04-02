@@ -11,12 +11,15 @@ import java.util.concurrent.Callable;
  * Created by czp on 17-3-30.
  */
 public class MainForm implements Callable {
+    private static final String mainFormName = "DanMuJi";
+
     private JPanel mainFormJPanel;
     private JTextArea textArea;
     private JTextField textField;
     private JButton startButton;
     private JButton stopButton;
     private JPanel barJPanel;
+    private JLabel statusJLabel;
 
     private NetRunnable netRunnable;
 
@@ -62,16 +65,18 @@ public class MainForm implements Callable {
                 return;
             }
 
-            netRunnable = new NetRunnable(roomId, textArea, this);
+            netRunnable = new NetRunnable(roomId, textArea, statusJLabel, this);
             new Thread(netRunnable).start();
 
             stopButton.setEnabled(true);
+            statusJLabel.setText("Connected");
         });
 
         //单击 Stop 按钮
         stopButton.addActionListener(actionEvent -> {
             stopButton.setEnabled(false);
             netRunnable.exit();
+            statusJLabel.setText("Disconnect");
         });
 
         //双击 textArea 隐藏 barPanel
@@ -90,7 +95,7 @@ public class MainForm implements Callable {
     }
 
     public static void main() {
-        JFrame frame = new JFrame("MainForm");
+        JFrame frame = new JFrame(mainFormName);
         frame.setContentPane(new MainForm().mainFormJPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();

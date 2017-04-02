@@ -1,13 +1,18 @@
 package com.hiczp.bilibili.live.api;
 
+import com.hiczp.bilibili.live.api.callback.IOnlineCountCallback;
 import com.sun.istack.internal.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by czp on 17-3-30.
@@ -16,13 +21,16 @@ public class LiveDanMuSDK implements Closeable {
     private static final String CID_INFO_URL = "http://live.bilibili.com/api/player?id=cid:";
     private static final int LIVE_SERVER_PORT = 788;
 
+    private boolean printDebugInfo = false;
+
     private Socket socket;
+    private IOnlineCountCallback iOnlineCountCallback;
 
     public void connect(@NotNull int roomId) throws IOException, IllegalArgumentException {
         String serverAddress;
         try {
             serverAddress = Jsoup.parse(new URL(CID_INFO_URL + roomId).openStream(),
-                    "UTF-8", "",
+                    StandardCharsets.UTF_8.toString(), "",
                     Parser.xmlParser())
                     .select("server").first()
                     .text();
@@ -33,13 +41,12 @@ public class LiveDanMuSDK implements Closeable {
         }
 
         socket = new Socket(serverAddress, LIVE_SERVER_PORT);
-        InputStream inputStream = socket.getInputStream();
         OutputStream outputStream = socket.getOutputStream();
 
         //发送进房数据包
         outputStream.write(PackageRepository.getJoinPackage(roomId));
         outputStream.flush();
-        if (!PackageRepository.validateJoinSuccessPackage(PackageRepository.readNextPackage(inputStream))) {
+        if (!PackageRepository.validateJoinSuccessPackage(PackageRepository.readNextPackage(socket))) {
             socket.close();
             throw new SocketException("Join live channel failed");
         }
@@ -48,7 +55,7 @@ public class LiveDanMuSDK implements Closeable {
         new Thread(new HeartBeatRunnable(socket)).start();
 
         //注册回调
-
+        new Thread(new CallbackDispatchRunnable(socket, printDebugInfo, iOnlineCountCallback)).start();
     }
 
     @Override
@@ -58,5 +65,17 @@ public class LiveDanMuSDK implements Closeable {
                 socket.close();
             }
         }
+    }
+
+    public boolean isPrintDebugInfo() {
+        return printDebugInfo;
+    }
+
+    public void setPrintDebugInfo(boolean printDebugInfo) {
+        this.printDebugInfo = printDebugInfo;
+    }
+
+    public void setiOnlineCountCallback(IOnlineCountCallback iOnlineCountCallback) {
+        this.iOnlineCountCallback = iOnlineCountCallback;
     }
 }

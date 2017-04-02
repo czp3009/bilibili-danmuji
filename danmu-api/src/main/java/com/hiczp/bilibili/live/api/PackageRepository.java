@@ -5,9 +5,12 @@ import com.hiczp.bilibili.live.api.entity.DanMuMSGEntity;
 import com.hiczp.bilibili.live.api.entity.JoinEntity;
 import com.hiczp.bilibili.live.api.entity.SendGiftEntity;
 import com.hiczp.bilibili.live.api.entity.WelcomeEntity;
+import com.hiczp.bilibili.live.api.exception.PackageLengthUnexpectedException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.net.Socket;
 import java.util.Arrays;
 
 /**
@@ -29,30 +32,11 @@ class PackageRepository {
         return bytes;
     }
 
-    private static int valueOf(byte[] bytes) {
-        int value = 0;
-        for (int i = 0; i < bytes.length; i++) {
-            value += bytes[i] * Math.pow(256, (bytes.length - 1 - i));
-        }
-        return value;
-    }
-
-    private static byte[] getEmptyPackageBytes(int packageLength) {
-        byte[] packageBytes = new byte[packageLength];
-        System.arraycopy(getPackageLengthBytes(packageLength), 0, packageBytes, 0, 4);
-        return packageBytes;
-    }
-
-    private static byte[] getEmptyPackageBytes(byte[] packageLengthBytes) {
-        int packageLength = valueOf(packageLengthBytes);
-        byte[] packageBytes = new byte[packageLength];
-        System.arraycopy(packageLengthBytes, 0, packageBytes, 0, 4);
-        return packageBytes;
-    }
-
     static byte[] getJoinPackage(int roomId) {
         byte[] jsonBytes = JSON.toJSONBytes(new JoinEntity(roomId));
-        byte[] packageBytes = getEmptyPackageBytes(jsonBytes.length + 16);
+        int packageLength = 16 + jsonBytes.length;
+        byte[] packageBytes = new byte[packageLength];
+        System.arraycopy(getPackageLengthBytes(packageLength), 0, packageBytes, 0, 4);
         System.arraycopy(joinPackageProtocolBytes, 0, packageBytes, 4, 12);
         System.arraycopy(jsonBytes, 0, packageBytes, 16, jsonBytes.length);
         return packageBytes;
@@ -62,13 +46,16 @@ class PackageRepository {
         return heartBeatPackage;
     }
 
-    static byte[] readNextPackage(InputStream inputStream) throws IOException {
-        byte[] packageLengthBytes = new byte[4];
-        byte[] nextPackage;
-        inputStream.read(packageLengthBytes);
-        nextPackage = getEmptyPackageBytes(packageLengthBytes);
-        inputStream.read(nextPackage, 4, nextPackage.length - 4);
-        return nextPackage;
+    static byte[] readNextPackage(Socket socket) throws IOException {
+        byte[] buffer = new byte[socket.getReceiveBufferSize()];
+        InputStream inputStream = socket.getInputStream();
+        inputStream.read(buffer, 0, 4);   //数据包长度
+        int packageLength = new BigInteger(1, Arrays.copyOfRange(buffer, 0, 4)).intValue();
+        if (packageLength < 16) {
+            throw new PackageLengthUnexpectedException("Unexpected package length: " + packageLength);
+        }
+        inputStream.read(buffer, 4, packageLength - 4);
+        return Arrays.copyOfRange(buffer, 0, packageLength);
     }
 
     static boolean validateJoinSuccessPackage(byte[] packageBytes) {
@@ -91,7 +78,7 @@ class PackageRepository {
     }
 
     static int parseOnlineCountPackage(byte[] packageBytes) {
-        return valueOf(Arrays.copyOfRange(packageBytes, 16, 20));
+        return new BigInteger(1, Arrays.copyOfRange(packageBytes, 16, 20)).intValue();
     }
 
     static DanMuMSGEntity parseDanMuMSGPackage(byte[] packageBytes) {

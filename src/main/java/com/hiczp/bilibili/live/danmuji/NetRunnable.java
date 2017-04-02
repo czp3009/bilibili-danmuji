@@ -2,6 +2,7 @@ package com.hiczp.bilibili.live.danmuji;
 
 
 import com.hiczp.bilibili.live.api.LiveDanMuSDK;
+import com.hiczp.bilibili.live.danmuji.callback.OnlineCountCallback;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -15,13 +16,15 @@ import java.util.concurrent.Callable;
 public class NetRunnable implements Runnable {
     private int roomId;
     private JTextArea jTextArea;
+    private JLabel jLabel;
     private Callable callable;
     private Thread thread;
     private LiveDanMuSDK liveDanMuSDK;
 
-    public NetRunnable(int roomId, JTextArea jTextArea, Callable callable) {
+    public NetRunnable(int roomId, JTextArea jTextArea, JLabel jLabel, Callable callable) {
         this.roomId = roomId;
         this.jTextArea = jTextArea;
+        this.jLabel = jLabel;
         this.callable = callable;
     }
 
@@ -30,6 +33,9 @@ public class NetRunnable implements Runnable {
         writeLine("Starting net-thread...");
         thread = Thread.currentThread();
         liveDanMuSDK = new LiveDanMuSDK();
+        liveDanMuSDK.setPrintDebugInfo(true);
+        //回调函数
+        liveDanMuSDK.setiOnlineCountCallback(new OnlineCountCallback(jLabel));
         try {
             liveDanMuSDK.connect(roomId);
             writeLine("Connect to live server success");
