@@ -3,10 +3,8 @@ package com.hiczp.bilibili.live.danmuji.gui;
 import com.hiczp.bilibili.live.danmuji.NetRunnable;
 
 import javax.swing.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.concurrent.Callable;
 
 /**
@@ -23,6 +21,19 @@ public class MainForm implements Callable {
     private NetRunnable netRunnable;
 
     private MainForm() {
+        //按 Enter 时点下 Start 按钮
+        AWTEventListener awtEventListener = (AWTEvent awtEvent) -> {
+            if (awtEvent instanceof KeyEvent) {
+                KeyEvent keyEvent = (KeyEvent) awtEvent;
+                if (keyEvent.getKeyChar() == KeyEvent.VK_ENTER && keyEvent.getID() == KeyEvent.KEY_RELEASED) {
+                    if (startButton.isEnabled()) {
+                        startButton.doClick();
+                    }
+                }
+            }
+        };
+        Toolkit.getDefaultToolkit().addAWTEventListener(awtEventListener, AWTEvent.KEY_EVENT_MASK);
+
         //textField 无字时禁用 Start 按钮
         textField.addKeyListener(new KeyAdapter() {
             @Override
@@ -37,10 +48,21 @@ public class MainForm implements Callable {
 
         //单击 Start 按钮
         startButton.addActionListener(actionEvent -> {
-            startButton.setEnabled(false);
             textField.setEnabled(false);
+            startButton.setEnabled(false);
 
-            netRunnable = new NetRunnable(textField.getText(), textArea, this);
+            int roomId;
+            try {
+                roomId = Integer.valueOf(textField.getText());
+            } catch (NumberFormatException e) {
+                textArea.append("RoomID not a number, input again!\n");
+                e.printStackTrace();
+                textField.setEnabled(true);
+                startButton.setEnabled(true);
+                return;
+            }
+
+            netRunnable = new NetRunnable(roomId, textArea, this);
             new Thread(netRunnable).start();
 
             stopButton.setEnabled(true);

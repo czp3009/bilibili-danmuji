@@ -13,13 +13,13 @@ import java.util.concurrent.Callable;
  * Created by czp on 17-3-30.
  */
 public class NetRunnable implements Runnable {
-    private String roomId;
+    private int roomId;
     private JTextArea jTextArea;
     private Callable callable;
     private Thread thread;
     private LiveDanMuSDK liveDanMuSDK;
 
-    public NetRunnable(String roomId, JTextArea jTextArea, Callable callable) {
+    public NetRunnable(int roomId, JTextArea jTextArea, Callable callable) {
         this.roomId = roomId;
         this.jTextArea = jTextArea;
         this.callable = callable;
@@ -37,6 +37,10 @@ public class NetRunnable implements Runnable {
             writeLine("Connect to live server failed: " + e.getMessage());
             e.printStackTrace();
             exit();
+        } catch (IllegalArgumentException e) {
+            writeLine("Illegal argument: " + e.getMessage());
+            e.printStackTrace();
+            exit();
         }
     }
 
@@ -46,8 +50,9 @@ public class NetRunnable implements Runnable {
         jTextArea.setCaretPosition(jTextArea.getText().length());
     }
 
-    //退出线程并回调主窗体
+    //回调主窗体并中断线程
     public void exit() {
+        writeLine("Stopping net-thread");
         //关闭连接
         try {
             liveDanMuSDK.close();
@@ -55,12 +60,11 @@ public class NetRunnable implements Runnable {
             e.printStackTrace();
         }
 
-        thread.interrupt();
-
         //回调主窗体
         try {
             callable.call();
             writeLine("Stopped net-thread");
+            thread.interrupt();
         } catch (Exception e) {
             writeLine("Exit net-thread failed: " + e.getMessage());
             e.printStackTrace();
