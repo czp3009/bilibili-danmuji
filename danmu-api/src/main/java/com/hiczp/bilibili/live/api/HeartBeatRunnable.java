@@ -7,10 +7,10 @@ import java.net.Socket;
 /**
  * Created by czp on 17-4-1.
  */
-public class HeartBeatRunnable implements Runnable {
+class HeartBeatRunnable implements Runnable {
     private Socket socket;
 
-    public HeartBeatRunnable(Socket socket) {
+    HeartBeatRunnable(Socket socket) {
         this.socket = socket;
     }
 

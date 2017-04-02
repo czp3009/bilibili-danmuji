@@ -1,6 +1,6 @@
 package com.hiczp.bilibili.live.api;
 
-import com.hiczp.bilibili.live.api.callback.IOnlineCountCallback;
+import com.hiczp.bilibili.live.api.callback.ILiveDanMuCallback;
 import com.sun.istack.internal.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
@@ -24,7 +24,7 @@ public class LiveDanMuSDK implements Closeable {
     private boolean printDebugInfo = false;
 
     private Socket socket;
-    private IOnlineCountCallback iOnlineCountCallback;
+    private ILiveDanMuCallback liveDanMuCallback;
 
     public void connect(@NotNull int roomId) throws IOException, IllegalArgumentException {
         String serverAddress;
@@ -55,7 +55,7 @@ public class LiveDanMuSDK implements Closeable {
         new Thread(new HeartBeatRunnable(socket)).start();
 
         //注册回调
-        new Thread(new CallbackDispatchRunnable(socket, printDebugInfo, iOnlineCountCallback)).start();
+        new Thread(new CallbackDispatchRunnable(socket, printDebugInfo, liveDanMuCallback)).start();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class LiveDanMuSDK implements Closeable {
         this.printDebugInfo = printDebugInfo;
     }
 
-    public void setiOnlineCountCallback(IOnlineCountCallback iOnlineCountCallback) {
-        this.iOnlineCountCallback = iOnlineCountCallback;
+    public void setLiveDanMuCallback(ILiveDanMuCallback liveDanMuCallback) {
+        this.liveDanMuCallback = liveDanMuCallback;
     }
 }

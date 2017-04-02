@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -71,7 +72,8 @@ class PackageRepository {
             return PackageType.ONLINE_COUNT;
         }
         if (Arrays.equals(protocolBytes, danMuDataPackageProtocolBytes)) {
-
+            String json = new String(Arrays.copyOfRange(packageBytes, 4, packageBytes.length), StandardCharsets.UTF_8);
+            return PackageType.getByName((String) JSON.parseObject(json).get("cmd"));
         }
 
         return null;

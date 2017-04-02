@@ -2,7 +2,7 @@ package com.hiczp.bilibili.live.danmuji;
 
 
 import com.hiczp.bilibili.live.api.LiveDanMuSDK;
-import com.hiczp.bilibili.live.danmuji.callback.OnlineCountCallback;
+import com.hiczp.bilibili.live.danmuji.callback.LiveDanMuCallback;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class NetRunnable implements Runnable {
         liveDanMuSDK = new LiveDanMuSDK();
         liveDanMuSDK.setPrintDebugInfo(true);
         //回调函数
-        liveDanMuSDK.setiOnlineCountCallback(new OnlineCountCallback(jLabel));
+        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(jLabel, jTextArea));
         try {
             liveDanMuSDK.connect(roomId);
             writeLine("Connect to live server success");

@@ -1,6 +1,6 @@
 package com.hiczp.bilibili.live.api;
 
-import com.hiczp.bilibili.live.api.callback.IOnlineCountCallback;
+import com.hiczp.bilibili.live.api.callback.ILiveDanMuCallback;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -10,15 +10,15 @@ import java.util.Arrays;
 /**
  * Created by czp on 17-4-2.
  */
-public class CallbackDispatchRunnable implements Runnable {
+class CallbackDispatchRunnable implements Runnable {
     private Socket socket;
     private boolean isPrintDebugInfo;
-    private IOnlineCountCallback iOnlineCountCallback;
+    private ILiveDanMuCallback liveDanMuCallback;
 
-    public CallbackDispatchRunnable(Socket socket, boolean isPrintDebugInfo, IOnlineCountCallback iOnlineCountCallback) {
+    CallbackDispatchRunnable(Socket socket, boolean isPrintDebugInfo, ILiveDanMuCallback liveDanMuCallback) {
         this.socket = socket;
         this.isPrintDebugInfo = isPrintDebugInfo;
-        this.iOnlineCountCallback = iOnlineCountCallback;
+        this.liveDanMuCallback = liveDanMuCallback;
     }
 
     @Override
@@ -38,7 +38,19 @@ public class CallbackDispatchRunnable implements Runnable {
                 }
                 switch (packageType) {
                     case ONLINE_COUNT: {
-                        iOnlineCountCallback.onOnlineCountPackage(PackageRepository.parseOnlineCountPackage(packageBytes));
+                        liveDanMuCallback.onOnlineCountPackage(PackageRepository.parseOnlineCountPackage(packageBytes));
+                    }
+                    break;
+                    case DANMU_MSG: {
+                        liveDanMuCallback.onDanMuMSGPackage(PackageRepository.parseDanMuMSGPackage(packageBytes));
+                    }
+                    break;
+                    case SEND_GIFT: {
+                        liveDanMuCallback.onSendGiftPackage(PackageRepository.parseSendGiftEntity(packageBytes));
+                    }
+                    break;
+                    case WELCOME: {
+                        liveDanMuCallback.onWelcomePackage(PackageRepository.parseWelcomeEntity(packageBytes));
                     }
                     break;
                 }
