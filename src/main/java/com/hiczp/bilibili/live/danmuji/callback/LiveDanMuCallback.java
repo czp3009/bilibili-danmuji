@@ -26,7 +26,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     }
 
     private void writeLine(String text, Object... objects) {
-        Utils.writeLineToJTextArea(mainForm.getjTextArea(), false, text, objects);
+        Utils.writeLineToJTextArea(mainForm.getjTextArea(), text, objects);
     }
 
     @Override
