@@ -33,6 +33,8 @@ openjdk-8-jdk build 1.8.0_121
 
 将其填入程序上方的输入框中, 单击 Start 按钮, enjoy!
 
+双击中心的 JTextArea 可以隐藏上方输入栏和按钮.
+
 # 库
 ./danmu-api 文件夹是直播弹幕库, 若有需要可用其二次开发.
 
