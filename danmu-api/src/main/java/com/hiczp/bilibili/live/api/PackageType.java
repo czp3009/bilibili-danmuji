@@ -10,7 +10,9 @@ enum PackageType {
     PREPARING,
     DANMU_MSG,
     SEND_GIFT,
-    WELCOME;
+    WELCOME,
+    SYS_MSG,
+    SYS_GIFT;
 
     static PackageType getByName(String s) {
         for (PackageType packageType : PackageType.values()) {

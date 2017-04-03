@@ -5,6 +5,7 @@ import com.hiczp.bilibili.live.api.LiveDanMuSDK;
 import com.hiczp.bilibili.live.danmuji.callback.LiveDanMuCallback;
 
 import javax.swing.*;
+import java.io.Closeable;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,7 +14,7 @@ import java.util.concurrent.Callable;
 /**
  * Created by czp on 17-3-30.
  */
-public class NetRunnable implements Runnable {
+public class NetRunnable implements Runnable, Closeable {
     private int roomId;
     private JTextArea jTextArea;
     private JLabel jLabel;
@@ -32,21 +33,21 @@ public class NetRunnable implements Runnable {
     public void run() {
         writeLine("Starting net-thread...");
         thread = Thread.currentThread();
-        liveDanMuSDK = new LiveDanMuSDK();
+        liveDanMuSDK = new LiveDanMuSDK(roomId);
         liveDanMuSDK.setPrintDebugInfo(true);
         //回调函数
-        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(jLabel, jTextArea));
+        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(jLabel, jTextArea, liveDanMuSDK, this));
         try {
-            liveDanMuSDK.connect(roomId);
+            liveDanMuSDK.connect();
             writeLine("Connect to live server success");
         } catch (IOException e) {
             writeLine("Connect to live server failed: " + e.getMessage());
             e.printStackTrace();
-            exit();
+            close();
         } catch (IllegalArgumentException e) {
             writeLine("Illegal argument: " + e.getMessage());
             e.printStackTrace();
-            exit();
+            close();
         }
     }
 
@@ -57,7 +58,8 @@ public class NetRunnable implements Runnable {
     }
 
     //回调主窗体并中断线程
-    public void exit() {
+    @Override
+    public void close() {
         writeLine("Stopping net-thread");
         //关闭连接
         try {

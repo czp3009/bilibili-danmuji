@@ -1,7 +1,6 @@
 package com.hiczp.bilibili.live.api;
 
 import com.hiczp.bilibili.live.api.callback.ILiveDanMuCallback;
-import com.sun.istack.internal.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
 
@@ -21,12 +20,16 @@ public class LiveDanMuSDK implements Closeable {
     private static final String CID_INFO_URL = "http://live.bilibili.com/api/player?id=cid:";
     private static final int LIVE_SERVER_PORT = 788;
 
+    private int roomId;
     private boolean printDebugInfo = false;
-
     private Socket socket;
     private ILiveDanMuCallback liveDanMuCallback;
 
-    public void connect(@NotNull int roomId) throws IOException, IllegalArgumentException {
+    public LiveDanMuSDK(int roomId) {
+        this.roomId = roomId;
+    }
+
+    public void connect() throws IOException, IllegalArgumentException {
         String serverAddress;
         try {
             serverAddress = Jsoup.parse(new URL(CID_INFO_URL + roomId).openStream(),
@@ -56,6 +59,11 @@ public class LiveDanMuSDK implements Closeable {
 
         //注册回调
         new Thread(new CallbackDispatchRunnable(socket, printDebugInfo, liveDanMuCallback)).start();
+    }
+
+    public void reconnect() throws IOException {
+        close();
+        connect();
     }
 
     @Override

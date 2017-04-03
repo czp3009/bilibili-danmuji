@@ -75,7 +75,7 @@ public class MainForm implements Callable {
         //单击 Stop 按钮
         stopButton.addActionListener(actionEvent -> {
             stopButton.setEnabled(false);
-            netRunnable.exit();
+            netRunnable.close();
             statusJLabel.setText("Disconnect");
         });
 
