@@ -28,7 +28,7 @@ public class Main {
         }
 
         //启动主窗体
-        MainForm.main();
+        new MainForm();
     }
 }
 

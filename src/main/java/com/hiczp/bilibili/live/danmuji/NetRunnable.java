@@ -3,30 +3,23 @@ package com.hiczp.bilibili.live.danmuji;
 
 import com.hiczp.bilibili.live.api.LiveDanMuSDK;
 import com.hiczp.bilibili.live.danmuji.callback.LiveDanMuCallback;
+import com.hiczp.bilibili.live.danmuji.gui.MainForm;
 
-import javax.swing.*;
 import java.io.Closeable;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.Callable;
 
 /**
  * Created by czp on 17-3-30.
  */
 public class NetRunnable implements Runnable, Closeable {
     private int roomId;
-    private JTextArea jTextArea;
-    private JLabel jLabel;
-    private Callable callable;
+    private MainForm mainForm;
     private Thread thread;
     private LiveDanMuSDK liveDanMuSDK;
 
-    public NetRunnable(int roomId, JTextArea jTextArea, JLabel jLabel, Callable callable) {
+    public NetRunnable(int roomId, MainForm mainForm) {
         this.roomId = roomId;
-        this.jTextArea = jTextArea;
-        this.jLabel = jLabel;
-        this.callable = callable;
+        this.mainForm = mainForm;
     }
 
     @Override
@@ -36,7 +29,7 @@ public class NetRunnable implements Runnable, Closeable {
         liveDanMuSDK = new LiveDanMuSDK(roomId);
         liveDanMuSDK.setPrintDebugInfo(true);
         //回调函数
-        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(jLabel, jTextArea, liveDanMuSDK, this));
+        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(mainForm, liveDanMuSDK, this));
         try {
             liveDanMuSDK.connect();
             writeLine("Connect to live server success");
@@ -52,9 +45,7 @@ public class NetRunnable implements Runnable, Closeable {
     }
 
     private void writeLine(String text, Object... objects) {
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        jTextArea.append(String.format("[%s] ", time) + String.format(text, objects) + "\n");
-        jTextArea.setCaretPosition(jTextArea.getText().length());
+        Utils.writeLineToJTextArea(mainForm.getjTextArea(), true, text, objects);
     }
 
     //回调主窗体并中断线程
@@ -70,7 +61,7 @@ public class NetRunnable implements Runnable, Closeable {
 
         //回调主窗体
         try {
-            callable.call();
+            mainForm.call();
             writeLine("Stopped net-thread");
             thread.interrupt();
         } catch (Exception e) {

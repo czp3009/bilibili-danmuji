@@ -6,6 +6,7 @@ import com.hiczp.bilibili.live.api.LiveDanMuSDK;
 import com.hiczp.bilibili.live.api.callback.ILiveDanMuCallback;
 import com.hiczp.bilibili.live.api.entity.*;
 import com.hiczp.bilibili.live.danmuji.Utils;
+import com.hiczp.bilibili.live.danmuji.gui.MainForm;
 
 import javax.swing.*;
 import java.io.Closeable;
@@ -15,25 +16,25 @@ import java.io.IOException;
  * Created by czp on 17-4-2.
  */
 public class LiveDanMuCallback implements ILiveDanMuCallback {
-    private JLabel jLabel;
-    private JTextArea jTextArea;
+    private MainForm mainForm;
     private LiveDanMuSDK liveDanMuSDK;
     private Closeable closeable;
+    private JTextArea jTextArea;
 
-    public LiveDanMuCallback(JLabel jLabel, JTextArea jTextArea, LiveDanMuSDK liveDanMuSDK, Closeable closeable) {
-        this.jLabel = jLabel;
-        this.jTextArea = jTextArea;
+    public LiveDanMuCallback(MainForm mainForm, LiveDanMuSDK liveDanMuSDK, Closeable closeable) {
+        this.mainForm = mainForm;
         this.liveDanMuSDK = liveDanMuSDK;
         this.closeable = closeable;
+        jTextArea = mainForm.getjTextArea();
     }
 
     @Override
     public void onDisconnect() {
-        jTextArea.append("Disconnect, trying reconnect...\n");
+        Utils.writeLineToJTextArea(jTextArea, "Disconnect, trying reconnect...");
         try {
             liveDanMuSDK.reconnect();
         } catch (IOException e) {
-            jTextArea.append("Reconnect failed");
+            Utils.writeLineToJTextArea(jTextArea, "Reconnect failed");
             try {
                 closeable.close();
             } catch (IOException ioException) {
@@ -44,7 +45,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
 
     @Override
     public void onOnlineCountPackage(int onlineCount) {
-        jLabel.setText("Viewer " + onlineCount);
+        mainForm.setSuffixOnTitle("Viewers " + onlineCount);
     }
 
     @Override

@@ -10,20 +10,19 @@ import java.util.concurrent.Callable;
 /**
  * Created by czp on 17-3-30.
  */
-public class MainForm implements Callable {
+public class MainForm extends JFrame implements Callable {
     private static final String mainFormName = "DanMuJi";
 
     private JPanel mainFormJPanel;
-    private JTextArea textArea;
+    private JTextArea jTextArea;
     private JTextField textField;
     private JButton startButton;
     private JButton stopButton;
     private JPanel barJPanel;
-    private JLabel statusJLabel;
 
     private NetRunnable netRunnable;
 
-    private MainForm() {
+    public MainForm() {
         //按 Enter 时点下 Start 按钮
         AWTEventListener awtEventListener = (AWTEvent awtEvent) -> {
             if (awtEvent instanceof KeyEvent) {
@@ -58,29 +57,28 @@ public class MainForm implements Callable {
             try {
                 roomId = Integer.valueOf(textField.getText());
             } catch (NumberFormatException e) {
-                textArea.append("RoomID not a number, input again!\n");
+                jTextArea.append("RoomID not a number, input again!\n");
                 e.printStackTrace();
                 textField.setEnabled(true);
                 startButton.setEnabled(true);
                 return;
             }
 
-            netRunnable = new NetRunnable(roomId, textArea, statusJLabel, this);
+            netRunnable = new NetRunnable(roomId, this);
             new Thread(netRunnable).start();
 
             stopButton.setEnabled(true);
-            statusJLabel.setText("Connected");
+            setSuffixOnTitle("Connected");
         });
 
         //单击 Stop 按钮
         stopButton.addActionListener(actionEvent -> {
             stopButton.setEnabled(false);
             netRunnable.close();
-            statusJLabel.setText("Disconnect");
         });
 
-        //双击 textArea 隐藏 barPanel
-        textArea.addMouseListener(new MouseAdapter() {
+        //双击 jTextArea 隐藏 barPanel
+        jTextArea.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (mouseEvent.getClickCount() == 2) {
@@ -92,14 +90,12 @@ public class MainForm implements Callable {
                 }
             }
         });
-    }
 
-    public static void main() {
-        JFrame frame = new JFrame(mainFormName);
-        frame.setContentPane(new MainForm().mainFormJPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
+        setTitle(mainFormName);
+        setContentPane(mainFormJPanel);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        setVisible(true);
     }
 
     //网络线程退出时调用
@@ -109,6 +105,15 @@ public class MainForm implements Callable {
         startButton.setEnabled(true);
         textField.setEnabled(true);
         textField.requestFocus();
+        setSuffixOnTitle("Disconnect");
         return null;
+    }
+
+    public void setSuffixOnTitle(String suffix) {
+        setTitle(String.format("%s - %s", mainFormName, suffix));
+    }
+
+    public JTextArea getjTextArea() {
+        return jTextArea;
     }
 }
