@@ -58,7 +58,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     @Override
     public void onSendGiftPackage(SendGiftEntity sendGiftEntity) {
         JSONObject data = sendGiftEntity.data;
-        writeLine("[SendGift] %s give %s X %d", data.getString("uname"), data.getString("giftName"), data.getIntValue("num"));
+        writeLine("[SendGift] %s given %s X %d", data.getString("uname"), data.getString("giftName"), data.getIntValue("num"));
     }
 
     @Override
