@@ -13,15 +13,11 @@ public class Main {
     public static void main(String[] args) {
         //设定主题
         String lookAndFeelName = null;
-        switch (System.getProperty("os.name")) {
-            case "Linux": {
-                lookAndFeelName = GTKLookAndFeel.class.getName();
-            }
-            break;
-            case "Windows": {
-                lookAndFeelName = WindowsLookAndFeel.class.getName();
-            }
-            break;
+        String osName = System.getProperty("os.name");
+        if (osName.contains("Linux")) {
+            lookAndFeelName = GTKLookAndFeel.class.getName();
+        } else if (osName.contains("Windows")) {
+            lookAndFeelName = WindowsLookAndFeel.class.getName();
         }
         if (lookAndFeelName != null) {
             try {
@@ -35,3 +31,4 @@ public class Main {
         MainForm.main();
     }
 }
+
