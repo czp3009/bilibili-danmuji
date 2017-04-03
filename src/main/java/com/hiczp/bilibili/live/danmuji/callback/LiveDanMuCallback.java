@@ -8,7 +8,6 @@ import com.hiczp.bilibili.live.api.entity.*;
 import com.hiczp.bilibili.live.danmuji.Utils;
 import com.hiczp.bilibili.live.danmuji.gui.MainForm;
 
-import javax.swing.*;
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -19,22 +18,24 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     private MainForm mainForm;
     private LiveDanMuSDK liveDanMuSDK;
     private Closeable closeable;
-    private JTextArea jTextArea;
 
     public LiveDanMuCallback(MainForm mainForm, LiveDanMuSDK liveDanMuSDK, Closeable closeable) {
         this.mainForm = mainForm;
         this.liveDanMuSDK = liveDanMuSDK;
         this.closeable = closeable;
-        jTextArea = mainForm.getjTextArea();
+    }
+
+    private void writeLine(String text, Object... objects) {
+        Utils.writeLineToJTextArea(mainForm.getjTextArea(), false, text, objects);
     }
 
     @Override
     public void onDisconnect() {
-        Utils.writeLineToJTextArea(jTextArea, "Disconnect, trying reconnect...");
+        writeLine("Disconnect, trying reconnect...");
         try {
             liveDanMuSDK.reconnect();
         } catch (IOException e) {
-            Utils.writeLineToJTextArea(jTextArea, "Reconnect failed");
+            writeLine("Reconnect failed");
             try {
                 closeable.close();
             } catch (IOException ioException) {
@@ -51,37 +52,37 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     @Override
     public void onDanMuMSGPackage(DanMuMSGEntity danMuMSGEntity) {
         JSONArray info = danMuMSGEntity.info;
-        Utils.writeLineToJTextArea(jTextArea, "[%s] %s", info.getJSONArray(2).getString(1), info.getString(1));
+        writeLine("[DanMu] %s: %s", info.getJSONArray(2).getString(1), info.getString(1));
     }
 
     @Override
     public void onSendGiftPackage(SendGiftEntity sendGiftEntity) {
         JSONObject data = sendGiftEntity.data;
-        Utils.writeLineToJTextArea(jTextArea, "[SendGift] %s give %s X %d", data.getString("uname"), data.getString("giftName"), data.getIntValue("num"));
+        writeLine("[SendGift] %s give %s X %d", data.getString("uname"), data.getString("giftName"), data.getIntValue("num"));
     }
 
     @Override
     public void onWelcomePackage(WelcomeEntity welcomeEntity) {
-        Utils.writeLineToJTextArea(jTextArea, "[Welcome] %s entered room!", welcomeEntity.data.getString("uname"));
+        writeLine("[Welcome] %s entered room!", welcomeEntity.data.getString("uname"));
     }
 
     @Override
     public void onSYSMSGPackage(SysMSGEntity sysMSGEntity) {
-        Utils.writeLineToJTextArea(jTextArea, "[SysMSG] %s %s", sysMSGEntity.msg, sysMSGEntity.url);
+        writeLine("[SysMSG] %s %s", sysMSGEntity.msg, sysMSGEntity.url);
     }
 
     @Override
     public void onSysGiftPackage(SysGiftEntity sysGiftEntity) {
-        Utils.writeLineToJTextArea(jTextArea, "[SysGift] %s", sysGiftEntity.msg);
+        writeLine("[SysGift] %s", sysGiftEntity.msg);
     }
 
     @Override
     public void onLivePackage(LiveEntity liveEntity) {
-        Utils.writeLineToJTextArea(jTextArea, "[Live] Room %d start live!", liveEntity.roomid);
+        writeLine("[Live] Room %d start live!", liveEntity.roomid);
     }
 
     @Override
     public void onPreparingPackage(PreparingEntity preparingEntity) {
-        Utils.writeLineToJTextArea(jTextArea, "[Preparing] Room %d stop live!", preparingEntity.roomid);
+        writeLine("[Preparing] Room %d stop live!", preparingEntity.roomid);
     }
 }

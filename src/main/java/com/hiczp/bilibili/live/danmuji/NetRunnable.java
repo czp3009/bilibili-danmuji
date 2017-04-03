@@ -22,6 +22,10 @@ public class NetRunnable implements Runnable, Closeable {
         this.mainForm = mainForm;
     }
 
+    private void writeLine(String text, Object... objects) {
+        Utils.writeLineToJTextArea(mainForm.getjTextArea(), true, text, objects);
+    }
+
     @Override
     public void run() {
         writeLine("Starting net-thread...");
@@ -42,10 +46,6 @@ public class NetRunnable implements Runnable, Closeable {
             e.printStackTrace();
             close();
         }
-    }
-
-    private void writeLine(String text, Object... objects) {
-        Utils.writeLineToJTextArea(mainForm.getjTextArea(), true, text, objects);
     }
 
     //回调主窗体并中断线程
