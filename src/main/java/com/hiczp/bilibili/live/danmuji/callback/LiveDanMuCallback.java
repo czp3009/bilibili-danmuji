@@ -67,6 +67,12 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     }
 
     @Override
+    public void onWelcomeGuardPackage(WelcomeGuardEntity welcomeGuardEntity) {
+        JSONObject data = welcomeGuardEntity.data;
+        writeLine("[WelcomeGuard] level %d guard %s entered!", data.getIntValue("guard_level"), data.getString("username"));
+    }
+
+    @Override
     public void onSYSMSGPackage(SysMSGEntity sysMSGEntity) {
         writeLine("[SysMSG] %s %s", sysMSGEntity.msg, sysMSGEntity.url);
     }

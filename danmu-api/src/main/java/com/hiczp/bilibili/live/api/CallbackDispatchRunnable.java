@@ -1,6 +1,7 @@
 package com.hiczp.bilibili.live.api;
 
 import com.hiczp.bilibili.live.api.callback.ILiveDanMuCallback;
+import com.hiczp.bilibili.live.api.entity.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -52,31 +53,35 @@ class CallbackDispatchRunnable implements Runnable {
                     }
                     break;
                     case DANMU_MSG: {
-                        liveDanMuCallback.onDanMuMSGPackage(PackageRepository.parseDanMuMSGPackage(packageBytes));
+                        liveDanMuCallback.onDanMuMSGPackage(PackageRepository.parseJsonPackage(packageBytes, DanMuMSGEntity.class));
                     }
                     break;
                     case SEND_GIFT: {
-                        liveDanMuCallback.onSendGiftPackage(PackageRepository.parseSendGiftPackage(packageBytes));
+                        liveDanMuCallback.onSendGiftPackage(PackageRepository.parseJsonPackage(packageBytes, SendGiftEntity.class));
                     }
                     break;
                     case WELCOME: {
-                        liveDanMuCallback.onWelcomePackage(PackageRepository.parseWelcomePackage(packageBytes));
+                        liveDanMuCallback.onWelcomePackage(PackageRepository.parseJsonPackage(packageBytes, WelcomeEntity.class));
+                    }
+                    break;
+                    case WELCOME_GUARD: {
+                        liveDanMuCallback.onWelcomeGuardPackage(PackageRepository.parseJsonPackage(packageBytes, WelcomeGuardEntity.class));
                     }
                     break;
                     case SYS_MSG: {
-                        liveDanMuCallback.onSYSMSGPackage(PackageRepository.parseSysMSGPackage(packageBytes));
+                        liveDanMuCallback.onSYSMSGPackage(PackageRepository.parseJsonPackage(packageBytes, SysMSGEntity.class));
                     }
                     break;
                     case SYS_GIFT: {
-                        liveDanMuCallback.onSysGiftPackage(PackageRepository.parseSysGiftPackage(packageBytes));
+                        liveDanMuCallback.onSysGiftPackage(PackageRepository.parseJsonPackage(packageBytes, SysGiftEntity.class));
                     }
                     break;
                     case LIVE: {
-                        liveDanMuCallback.onLivePackage(PackageRepository.parseLivePackage(packageBytes));
+                        liveDanMuCallback.onLivePackage(PackageRepository.parseJsonPackage(packageBytes, LiveEntity.class));
                     }
                     break;
                     case PREPARING: {
-                        liveDanMuCallback.onPreparingPackage(PackageRepository.parsePreparingPackage(packageBytes));
+                        liveDanMuCallback.onPreparingPackage(PackageRepository.parseJsonPackage(packageBytes, PreparingEntity.class));
                     }
                 }
             } catch (IOException e) {
@@ -85,5 +90,6 @@ class CallbackDispatchRunnable implements Runnable {
                 e.printStackTrace();
             }
         }
+        liveDanMuCallback.onDisconnect();
     }
 }

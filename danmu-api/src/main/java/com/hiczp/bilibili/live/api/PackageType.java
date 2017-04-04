@@ -11,6 +11,7 @@ enum PackageType {
     DANMU_MSG,
     SEND_GIFT,
     WELCOME,
+    WELCOME_GUARD,
     SYS_MSG,
     SYS_GIFT;
 

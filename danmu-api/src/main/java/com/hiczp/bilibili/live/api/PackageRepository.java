@@ -1,11 +1,12 @@
 package com.hiczp.bilibili.live.api;
 
 import com.alibaba.fastjson.JSON;
-import com.hiczp.bilibili.live.api.entity.*;
+import com.hiczp.bilibili.live.api.entity.JoinEntity;
 import com.hiczp.bilibili.live.api.exception.PackageLengthUnexpectedException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -80,31 +81,7 @@ class PackageRepository {
         return new BigInteger(1, Arrays.copyOfRange(packageBytes, 16, 20)).intValue();
     }
 
-    static DanMuMSGEntity parseDanMuMSGPackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, DanMuMSGEntity.class);
-    }
-
-    static SendGiftEntity parseSendGiftPackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, SendGiftEntity.class);
-    }
-
-    static WelcomeEntity parseWelcomePackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, WelcomeEntity.class);
-    }
-
-    static SysMSGEntity parseSysMSGPackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, SysMSGEntity.class);
-    }
-
-    static SysGiftEntity parseSysGiftPackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, SysGiftEntity.class);
-    }
-
-    static LiveEntity parseLivePackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, LiveEntity.class);
-    }
-
-    static PreparingEntity parsePreparingPackage(byte[] packageBytes) {
-        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, PreparingEntity.class);
+    static <T> T parseJsonPackage(byte[] packageBytes, Type T) {
+        return JSON.parseObject(packageBytes, 4, packageBytes.length - 4, StandardCharsets.UTF_8, T);
     }
 }

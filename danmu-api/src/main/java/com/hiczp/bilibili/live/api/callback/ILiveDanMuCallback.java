@@ -16,6 +16,8 @@ public interface ILiveDanMuCallback {
 
     void onWelcomePackage(WelcomeEntity welcomeEntity);
 
+    void onWelcomeGuardPackage(WelcomeGuardEntity welcomeGuardEntity);
+
     void onSYSMSGPackage(SysMSGEntity sysMSGEntity);
 
     void onSysGiftPackage(SysGiftEntity sysGiftEntity);
