@@ -17,7 +17,7 @@ openjdk-8-jdk build 1.8.0_121
 
 在 Chrome 中访问目标直播间, 查看源代码
 
-在 <head> 标签中找到类似如下段
+在 \<head> 标签中找到类似如下段
 
     <script>
         document.domain = 'bilibili.com';
@@ -42,11 +42,12 @@ openjdk-8-jdk build 1.8.0_121
 
 示例
 
-    LiveDanMuSDK liveDanMuSDK=new LiveDanMuSDK(1000);   //1000 为 RoomID
+    LiveDanMuSDK liveDanMuSDK = new LiveDanMuSDK(1000);   //1000 为 RoomID
     liveDanMuSDK.setPrintDebugInfo(true);   //设置在控制台输出调试信息
     //MyLiveDanMuCallBack 是 implement 于 ILiveDanMuCallback 的实体类, 用于处理回调, 需实现其中的各项方法
     liveDanMuSDK.setLiveDanMuCallback(new MyLiveDanMuCallBack());
     try {
+        liveDanMuSDK.connect(); //连接, 可能出现 Socket 相关异常
     } catch (IOException e) {
         //Connect failed, do something here
     }
