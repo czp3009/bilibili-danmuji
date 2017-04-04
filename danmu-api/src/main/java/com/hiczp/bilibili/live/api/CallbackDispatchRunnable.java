@@ -24,6 +24,9 @@ class CallbackDispatchRunnable implements Runnable {
 
     @Override
     public void run() {
+        if (liveDanMuCallback == null) {
+            return;
+        }
         while (socket.isConnected()) {
             try {
                 byte[] packageBytes = PackageRepository.readNextPackage(socket);
