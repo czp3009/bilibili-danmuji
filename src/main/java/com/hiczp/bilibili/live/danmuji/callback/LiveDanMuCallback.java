@@ -9,7 +9,6 @@ import com.hiczp.bilibili.live.danmuji.Utils;
 import com.hiczp.bilibili.live.danmuji.gui.MainForm;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 /**
  * Created by czp on 17-4-2.
@@ -31,17 +30,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
 
     @Override
     public void onDisconnect() {
-        writeLine("Disconnect, trying reconnect...");
-        try {
-            liveDanMuSDK.reconnect();
-        } catch (IOException e) {
-            writeLine("Reconnect failed");
-            try {
-                closeable.close();
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        }
+        writeLine("Disconnect!");
     }
 
     @Override

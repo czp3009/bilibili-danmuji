@@ -83,6 +83,7 @@ class CallbackDispatchRunnable implements Runnable {
                     case PREPARING: {
                         liveDanMuCallback.onPreparingPackage(PackageRepository.parseJsonPackage(packageBytes, PreparingEntity.class));
                     }
+                    break;
                 }
             } catch (IOException e) {
                 break;
