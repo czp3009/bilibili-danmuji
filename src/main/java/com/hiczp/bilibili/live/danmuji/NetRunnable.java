@@ -33,7 +33,7 @@ public class NetRunnable implements Runnable, Closeable {
         liveDanMuSDK = new LiveDanMuSDK(roomId);
         liveDanMuSDK.setPrintDebugInfo(true);
         //回调函数
-        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(mainForm, liveDanMuSDK, this));
+        liveDanMuSDK.setLiveDanMuCallback(new LiveDanMuCallback(mainForm));
         try {
             liveDanMuSDK.connect();
             writeLine("Connect to live server success");

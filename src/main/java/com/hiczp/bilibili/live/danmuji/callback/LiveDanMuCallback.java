@@ -2,26 +2,19 @@ package com.hiczp.bilibili.live.danmuji.callback;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.hiczp.bilibili.live.api.LiveDanMuSDK;
 import com.hiczp.bilibili.live.api.callback.ILiveDanMuCallback;
 import com.hiczp.bilibili.live.api.entity.*;
 import com.hiczp.bilibili.live.danmuji.Utils;
 import com.hiczp.bilibili.live.danmuji.gui.MainForm;
-
-import java.io.Closeable;
 
 /**
  * Created by czp on 17-4-2.
  */
 public class LiveDanMuCallback implements ILiveDanMuCallback {
     private MainForm mainForm;
-    private LiveDanMuSDK liveDanMuSDK;
-    private Closeable closeable;
 
-    public LiveDanMuCallback(MainForm mainForm, LiveDanMuSDK liveDanMuSDK, Closeable closeable) {
+    public LiveDanMuCallback(MainForm mainForm) {
         this.mainForm = mainForm;
-        this.liveDanMuSDK = liveDanMuSDK;
-        this.closeable = closeable;
     }
 
     private void writeLine(String text, Object... objects) {

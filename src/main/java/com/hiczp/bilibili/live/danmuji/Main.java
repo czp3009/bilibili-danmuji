@@ -31,4 +31,3 @@ public class Main {
         new MainForm();
     }
 }
-

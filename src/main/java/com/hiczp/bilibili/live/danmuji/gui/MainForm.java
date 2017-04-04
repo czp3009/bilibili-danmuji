@@ -1,6 +1,9 @@
 package com.hiczp.bilibili.live.danmuji.gui;
 
 import com.hiczp.bilibili.live.danmuji.NetRunnable;
+import com.hiczp.bilibili.live.danmuji.Utils;
+import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
+import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -91,11 +94,76 @@ public class MainForm extends JFrame implements Callable {
             }
         });
 
+        //设置右键菜单
+        attachJPopupMenu(jTextArea);
+
         setTitle(mainFormName);
         setContentPane(mainFormJPanel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
         setVisible(true);
+    }
+
+    private void writeLine(String text, Object... objects) {
+        Utils.writeLineToJTextArea(jTextArea, true, text, objects);
+    }
+
+    private void attachJPopupMenu(JComponent jComponent) {
+        JPopupMenu jPopupMenu = new JPopupMenu();
+        JMenuItem clear = new JMenuItem("Clear screen");
+        JMenuItem hideBar = new JMenuItem("Hide bar");
+        JMenuItem showBar = new JMenuItem("Show bar");
+        showBar.setVisible(false);
+        JMenu theme = new JMenu("Theme");
+        JMenuItem gtk = new JMenuItem("gtk");
+        JMenuItem windows = new JMenuItem("windows");
+        theme.add(gtk);
+        theme.add(windows);
+        jPopupMenu.add(clear);
+        jPopupMenu.add(hideBar);
+        jPopupMenu.add(showBar);
+        jPopupMenu.add(theme);
+
+        jComponent.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                if (mouseEvent.getButton() == MouseEvent.BUTTON3) {
+                    jPopupMenu.show(jComponent, mouseEvent.getX(), mouseEvent.getY());
+                }
+            }
+        });
+
+        clear.addActionListener(actionEvent -> jTextArea.setText(""));
+
+        hideBar.addActionListener(actionEvent -> {
+            barJPanel.setVisible(false);
+            hideBar.setVisible(false);
+            showBar.setVisible(true);
+        });
+
+        showBar.addActionListener(actionEvent -> {
+            barJPanel.setVisible(true);
+            showBar.setVisible(false);
+            hideBar.setVisible(true);
+        });
+
+        gtk.addActionListener(actionEvent -> {
+            try {
+                UIManager.setLookAndFeel(GTKLookAndFeel.class.getName());
+            } catch (Exception e) {
+                writeLine(e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        windows.addActionListener(actionEvent -> {
+            try {
+                UIManager.setLookAndFeel(WindowsLookAndFeel.class.getName());
+            } catch (Exception e) {
+                writeLine(e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
 
     //网络线程退出时调用
