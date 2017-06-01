@@ -85,4 +85,9 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     public void onPreparingPackage(PreparingEntity preparingEntity) {
         printMessage("[Preparing] Room %d stop live!", preparingEntity.roomid);
     }
+
+    @Override
+    public void onRoomAdminsPackage(RoomAdminsEntity roomAdminsEntity) {
+        printMessage("There are %d room admins.", roomAdminsEntity.uids.length);
+    }
 }
