@@ -1,13 +1,11 @@
 package com.hiczp.bilibili.live.danmuji;
 
-import com.hiczp.bilibili.live.danmuji.gui.MainForm;
-import com.sun.java.swing.plaf.gtk.GTKLookAndFeel;
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+import com.hiczp.bilibili.live.danmuji.ui.MainForm;
 
 import javax.swing.*;
 
 /**
- * Created by czp on 17-3-29.
+ * Created by czp on 17-5-31.
  */
 public class Main {
     public static void main(String[] args) {
@@ -15,9 +13,9 @@ public class Main {
         String lookAndFeelName = null;
         String osName = System.getProperty("os.name");
         if (osName.contains("Linux")) {
-            lookAndFeelName = GTKLookAndFeel.class.getName();
+            lookAndFeelName = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel"; //使用字符串是为了防止Windows Oracle JDK无法编译
         } else if (osName.contains("Windows")) {
-            lookAndFeelName = WindowsLookAndFeel.class.getName();
+            lookAndFeelName = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         }
         if (lookAndFeelName != null) {
             try {
