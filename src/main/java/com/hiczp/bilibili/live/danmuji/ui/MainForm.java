@@ -16,6 +16,7 @@ import java.util.Date;
  * Created by czp on 17-5-31.
  */
 public class MainForm extends JFrame {
+    private static final String FORM_TITLE = "DanMuJi";
     private static final String BILIBILI_LIVE_URL_PREFIX = "http://live.bilibili.com/";
 
     private JPanel mainFormJPanel;
@@ -65,9 +66,11 @@ public class MainForm extends JFrame {
                 stopButton.setEnabled(false);
                 textField.setEnabled(true);
                 startButton.setEnabled(true);
+                setTitle(FORM_TITLE);
             }
         });
 
+        setTitle(FORM_TITLE);
         setContentPane(mainFormJPanel);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
