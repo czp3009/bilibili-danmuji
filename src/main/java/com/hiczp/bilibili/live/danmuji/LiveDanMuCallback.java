@@ -13,16 +13,22 @@ import java.util.Date;
  */
 public class LiveDanMuCallback implements ILiveDanMuCallback {
     private JFrame jFrame;
+    private JTextPane jTextPane;
     private StyledDocument styledDocument;
 
-    public LiveDanMuCallback(JFrame jFrame, StyledDocument styledDocument) {
+    public LiveDanMuCallback(JFrame jFrame, JTextPane jTextPane) {
         this.jFrame = jFrame;
-        this.styledDocument = styledDocument;
+        this.jTextPane = jTextPane;
+        styledDocument = jTextPane.getStyledDocument();
     }
 
     private void printMessage(String message, Object... objects) {
         try {
+            boolean isInEnd = jTextPane.getCaretPosition() == jTextPane.getText().length();
             styledDocument.insertString(styledDocument.getLength(), String.format(message, objects) + "\n", null);
+            if (isInEnd) {
+                jTextPane.setCaretPosition(jTextPane.getText().length());
+            }
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
@@ -40,7 +46,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
 
     @Override
     public void onDanMuMSGPackage(DanMuMSGEntity danMuMSGEntity) {
-        printMessage("[DanMu] %s: %s", danMuMSGEntity.getSenderNick(), danMuMSGEntity.getDanMuContent());
+        printMessage("[DanMu] [%s] %s", danMuMSGEntity.getSenderNick(), danMuMSGEntity.getDanMuContent());
     }
 
     @Override

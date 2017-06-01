@@ -41,9 +41,10 @@ public class MainForm extends JFrame {
             try {
                 liveDanMuAPI = new LiveDanMuAPI(BILIBILI_LIVE_URL_PREFIX + textField.getText())
                         .setPrintDebugInfo(true)
-                        .addCallback(new LiveDanMuCallback(this, styledDocument))
+                        .addCallback(new LiveDanMuCallback(this, textPane))
                         .connect();
                 printInfo("Connect succeed!");
+                textField.setEnabled(false);
                 startButton.setEnabled(false);
                 stopButton.setEnabled(true);
             } catch (IOException | IllegalArgumentException e) {
@@ -56,10 +57,14 @@ public class MainForm extends JFrame {
         stopButton.addActionListener(actionEvent -> {
             try {
                 liveDanMuAPI.close();
-                stopButton.setEnabled(false);
-                startButton.setEnabled(true);
             } catch (IOException e) {
+                printInfo("%s: %s", e.getClass().getName(), e.getMessage());
+                printInfo("Cannot close connection, reopen program may solve this problem.");
                 e.printStackTrace();
+            } finally {
+                stopButton.setEnabled(false);
+                textField.setEnabled(true);
+                startButton.setEnabled(true);
             }
         });
 
