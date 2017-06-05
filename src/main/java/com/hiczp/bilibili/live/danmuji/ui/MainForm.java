@@ -46,6 +46,9 @@ public class MainForm extends JFrame {
         operationArea.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
         window.add(operationArea);
         window.addSeparator();
+        JMenuItem clearText = new JMenuItem("Clear text");
+        window.add(clearText);
+        window.addSeparator();
         JMenuItem exit = new JMenuItem("exit");
         window.add(exit);
         jMenuBar.add(window);
@@ -66,6 +69,8 @@ public class MainForm extends JFrame {
 
         //监听器
         operationArea.addItemListener(itemEvent -> mainOperationJPanel.setVisible(operationArea.isSelected()));
+
+        clearText.addActionListener(itemEvent -> textPane.setText(""));
 
         exit.addActionListener(actionEvent -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 
