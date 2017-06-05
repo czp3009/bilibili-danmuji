@@ -7,7 +7,7 @@
     <groupId>com.hiczp</groupId>
     <artifactId>bilibili-live-danmuji</artifactId>
     <packaging>pom</packaging>
-    <version>0.1</version>
+    <version>1.2</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -28,4 +28,22 @@
             <version>1.0.4</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>com.hiczp.bilibili.live.danmuji.Main</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

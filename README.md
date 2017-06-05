@@ -6,6 +6,9 @@ openjdk-8-jdk
 
 Maven 3.3.9
 
+    mvn compile
+    mvn exec:exec
+
 # 使用
 补全直播房间 URL 后, 点击 Start 按钮开始接收弹幕.
 
