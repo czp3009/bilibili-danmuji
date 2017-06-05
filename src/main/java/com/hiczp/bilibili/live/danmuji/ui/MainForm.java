@@ -3,18 +3,21 @@ package com.hiczp.bilibili.live.danmuji.ui;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuAPI;
 import com.hiczp.bilibili.live.danmuji.Config;
 import com.hiczp.bilibili.live.danmuji.LiveDanMuCallback;
+import com.hiczp.bilibili.live.danmuji.Main;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.StyledDocument;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -24,7 +27,6 @@ public class MainForm extends JFrame {
     private static final String FORM_TITLE = "DanMuJi";
     private static final String BILIBILI_LIVE_URL_PREFIX = "http://live.bilibili.com/";
 
-    private JMenuBar jMenuBar;
     private JPanel mainFormJPanel;
     private JTextField textField;
     private JButton startButton;
@@ -37,7 +39,7 @@ public class MainForm extends JFrame {
 
     //JMenuBar
     {
-        jMenuBar = new JMenuBar();
+        JMenuBar jMenuBar = new JMenuBar();
 
         JMenu window = new JMenu("Window");
         JMenuItem operationArea = new JCheckBoxMenuItem("Operation area", true);
@@ -49,6 +51,8 @@ public class MainForm extends JFrame {
         jMenuBar.add(window);
 
         JMenu config = new JMenu("Config");
+        JMenuItem outputSetting = new JMenuItem("Output setting");
+        config.add(outputSetting);
         jMenuBar.add(config);
 
         JMenu help = new JMenu("Help");
@@ -63,7 +67,9 @@ public class MainForm extends JFrame {
         //监听器
         operationArea.addItemListener(itemEvent -> mainOperationJPanel.setVisible(operationArea.isSelected()));
 
-        exit.addActionListener(actionEvent -> System.exit(0));
+        exit.addActionListener(actionEvent -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
+
+        outputSetting.addActionListener(actionEvent -> new OutputSettingForm());
 
         checkUpdates.addActionListener(actionEvent -> {
             try {
@@ -103,10 +109,6 @@ public class MainForm extends JFrame {
                         .setPrintDebugInfo(true)
                         .addCallback(new LiveDanMuCallback(this, textPane))
                         .connect();
-                printInfo("Connect succeed!");
-                textField.setEnabled(false);
-                startButton.setEnabled(false);
-                stopButton.setEnabled(true);
             } catch (IOException | IllegalArgumentException e) {
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 printInfo("Connect failed!");
@@ -122,10 +124,14 @@ public class MainForm extends JFrame {
                 printInfo("Cannot close connection, reopen program may solve this problem.");
                 e.printStackTrace();
             } finally {
-                stopButton.setEnabled(false);
-                textField.setEnabled(true);
-                startButton.setEnabled(true);
-                setTitle(FORM_TITLE);
+                onDisconnect();
+            }
+        });
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent windowEvent) {
+                Main.getConfig().storeToFile();
             }
         });
 
@@ -136,8 +142,6 @@ public class MainForm extends JFrame {
         setLocationRelativeTo(null);
         pack();
         setVisible(true);
-        textField.addKeyListener(new KeyAdapter() {
-        });
     }
 
     private void printInfo(String message, Object... objects) {
@@ -146,6 +150,36 @@ public class MainForm extends JFrame {
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onConnect() {
+        textField.setEnabled(false);
+        startButton.setEnabled(false);
+        stopButton.setEnabled(true);
+    }
+
+    public void onDisconnect() {
+        stopButton.setEnabled(false);
+        textField.setEnabled(true);
+        startButton.setEnabled(true);
+        setTitle(FORM_TITLE);
+    }
+
+    public void reloadStyle() {
+        Style defaultStyle = styledDocument.getStyle(StyleContext.DEFAULT_STYLE);
+        Arrays.stream(Config.class.getDeclaredFields())
+                .filter(field -> field.getType() == Config.OutputOptions.class)
+                .forEach(field -> {
+                    try {
+                        String fieldName = field.getName();
+                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(Main.getConfig());
+                        Style style = styledDocument.addStyle(fieldName + "Style", defaultStyle);
+                        StyleConstants.setFontSize(style, outputOptions.size);
+                        StyleConstants.setForeground(style, outputOptions.color);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     /**
