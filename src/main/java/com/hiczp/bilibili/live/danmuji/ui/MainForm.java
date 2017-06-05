@@ -27,6 +27,7 @@ public class MainForm extends JFrame {
     private static final String FORM_TITLE = "DanMuJi";
     private static final String BILIBILI_LIVE_URL_PREFIX = "http://live.bilibili.com/";
 
+    private Config config = Main.getConfig();
     private JPanel mainFormJPanel;
     private JTextField textField;
     private JButton startButton;
@@ -97,6 +98,8 @@ public class MainForm extends JFrame {
     public MainForm() {
         //变量
         styledDocument = textPane.getStyledDocument();
+        textField.setText(config.roomId);
+        textField.setCaretPosition(textField.getText().length());
 
         //监听器
         textField.addKeyListener(new KeyAdapter() {
@@ -111,7 +114,7 @@ public class MainForm extends JFrame {
         startButton.addActionListener(actionEvent -> {
             try {
                 liveDanMuAPI = new LiveDanMuAPI(BILIBILI_LIVE_URL_PREFIX + textField.getText())
-                        .setPrintDebugInfo(true)
+                        .setPrintDebugInfo(config.debug)
                         .addCallback(new LiveDanMuCallback(this, textPane))
                         .connect();
             } catch (IOException | IllegalArgumentException e) {
@@ -136,7 +139,8 @@ public class MainForm extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                Main.getConfig().storeToFile();
+                config.roomId = textField.getText();
+                config.storeToFile();
             }
         });
 
@@ -177,7 +181,7 @@ public class MainForm extends JFrame {
                 .forEach(field -> {
                     try {
                         String fieldName = field.getName();
-                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(Main.getConfig());
+                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(config);
                         Style style = styledDocument.addStyle(fieldName + "Style", defaultStyle);
                         StyleConstants.setFontSize(style, outputOptions.size);
                         StyleConstants.setForeground(style, outputOptions.color);

@@ -14,6 +14,9 @@ public class Config {
     public static final String CONFIG_FILE_NAME = "config.json";
     public static final String GITHUB_REPOSITORY = "https://github.com/czp3009/danmuji";
 
+    public boolean debug = false;
+    public String roomId;
+
     public OutputOptions Connect = new OutputOptions();
     public OutputOptions Disconnect = new OutputOptions();
     public OutputOptions DanMu = new OutputOptions();
