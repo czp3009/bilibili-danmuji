@@ -1,6 +1,6 @@
 package com.hiczp.bilibili.live.danmuji.ui;
 
-import com.hiczp.bilibili.live.danmu.api.LiveDanMuAPI;
+import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmuji.Config;
 import com.hiczp.bilibili.live.danmuji.LiveDanMuCallback;
 import com.hiczp.bilibili.live.danmuji.Main;
@@ -35,7 +35,7 @@ public class MainForm extends JFrame {
     private JTextPane textPane;
     private JPanel mainOperationJPanel;
 
-    private LiveDanMuAPI liveDanMuAPI;
+    private LiveDanMuReceiver liveDanMuReceiver;
     private StyledDocument styledDocument;
 
     //JMenuBar
@@ -113,7 +113,7 @@ public class MainForm extends JFrame {
 
         startButton.addActionListener(actionEvent -> {
             try {
-                liveDanMuAPI = new LiveDanMuAPI(BILIBILI_LIVE_URL_PREFIX + textField.getText())
+                liveDanMuReceiver = new LiveDanMuReceiver(BILIBILI_LIVE_URL_PREFIX + textField.getText())
                         .setPrintDebugInfo(config.debug)
                         .addCallback(new LiveDanMuCallback(this, textPane))
                         .connect();
@@ -126,7 +126,7 @@ public class MainForm extends JFrame {
 
         stopButton.addActionListener(actionEvent -> {
             try {
-                liveDanMuAPI.close();
+                liveDanMuReceiver.close();
             } catch (IOException e) {
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 printInfo("Cannot close connection, reopen program may solve this problem.");
