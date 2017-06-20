@@ -4,54 +4,43 @@ import com.hiczp.bilibili.live.danmu.api.ILiveDanMuCallback;
 import com.hiczp.bilibili.live.danmu.api.entity.*;
 import com.hiczp.bilibili.live.danmuji.ui.MainForm;
 
-import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Style;
-import javax.swing.text.StyledDocument;
+import java.io.IOException;
 import java.util.Date;
 
 /**
  * Created by czp on 17-6-1.
  */
 public class LiveDanMuCallback implements ILiveDanMuCallback {
-    private MainForm mainForm;
-    private JTextPane jTextPane;
-    private StyledDocument styledDocument;
-    private Config config = Main.getConfig();
-
-    public LiveDanMuCallback(MainForm mainForm, JTextPane jTextPane) {
-        this.mainForm = mainForm;
-        this.jTextPane = jTextPane;
-        this.styledDocument = jTextPane.getStyledDocument();
-    }
-
-    private void printMessage(String message, Style style) {
-        try {
-            boolean isInEnd = jTextPane.getCaretPosition() == jTextPane.getText().length();
-            styledDocument.insertString(styledDocument.getLength(), message + "\n", style);
-            if (isInEnd) {
-                jTextPane.setCaretPosition(jTextPane.getText().length());   //如果光标在最后则自动滚屏
-            }
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
-    }
+    private MainForm mainForm = WindowManager.getMainForm();
+    private Config config = DanMuJi.getConfig();
 
     @Override
     public void onConnect() {
         mainForm.onConnect();
         if (config.Connect.on) {
-            printMessage(String.format("[%s] Connect succeed!", new Date()),
-                    styledDocument.getStyle("ConnectStyle"));
+            mainForm.printMessage("ConnectStyle",
+                    "[%s] Connect succeed!", new Date());
         }
     }
 
     @Override
     public void onDisconnect() {
-        mainForm.onDisconnect();
-        if (config.Disconnect.on) {
-            printMessage(String.format("[%s] Disconnected!", new Date()),
-                    styledDocument.getStyle("DisconnectStyle"));
+        if (Config.userWantDisconnect) {
+            mainForm.onDisconnect();
+            if (config.Disconnect.on) {
+                mainForm.printMessage("DisconnectStyle",
+                        "[%s] Disconnected!", new Date());
+            }
+        } else {
+            mainForm.printInfo("Reconnecting...");
+            try {
+                mainForm.getLiveDanMuReceiver().connect();
+            } catch (IOException e) {
+                Config.userWantDisconnect = true;
+                mainForm.printInfo("%s: %s", e.getClass().getName(), e.getMessage());
+                mainForm.printInfo("Abort operation.");
+                e.printStackTrace();
+            }
         }
     }
 
@@ -63,16 +52,16 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     @Override
     public void onDanMuMSGPackage(DanMuMSGEntity danMuMSGEntity) {
         if (config.DanMu.on) {
-            printMessage(String.format("[DanMu] [%s] %s", danMuMSGEntity.getSenderNick(), danMuMSGEntity.getDanMuContent()),
-                    styledDocument.getStyle("DanMuStyle"));
+            mainForm.printMessage("DanMuStyle",
+                    "[DanMu] [%s] %s", danMuMSGEntity.getSenderNick(), danMuMSGEntity.getDanMuContent());
         }
     }
 
     @Override
     public void onSysMSGPackage(SysMSGEntity sysMSGEntity) {
         if (config.SysMSG.on) {
-            printMessage(String.format("[SysMSG] %s %s", sysMSGEntity.msg, sysMSGEntity.url),
-                    styledDocument.getStyle("SysMSGStyle"));
+            mainForm.printMessage("SysMSGStyle",
+                    "[SysMSG] %s %s", sysMSGEntity.msg, sysMSGEntity.url);
         }
     }
 
@@ -80,24 +69,24 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     public void onSendGiftPackage(SendGiftEntity sendGiftEntity) {
         if (config.SendGift.on) {
             SendGiftEntity.SendGiftEntityData data = sendGiftEntity.data;
-            printMessage(String.format("[SendGift] %s given %s * %d", data.uname, data.giftName, data.num),
-                    styledDocument.getStyle("SendGiftStyle"));
+            mainForm.printMessage("SendGiftStyle",
+                    "[SendGift] %s given %s * %d", data.uname, data.giftName, data.num);
         }
     }
 
     @Override
     public void onSysGiftPackage(SysGiftEntity sysGiftEntity) {
         if (config.SysGift.on) {
-            printMessage(String.format("[SysGift] %s", sysGiftEntity.msg),
-                    styledDocument.getStyle("SysGiftStyle"));
+            mainForm.printMessage("SysGiftStyle",
+                    "[SysGift] %s", sysGiftEntity.msg);
         }
     }
 
     @Override
     public void onWelcomePackage(WelcomeEntity welcomeEntity) {
         if (config.Welcome.on) {
-            printMessage(String.format("[Welcome] %s entered room!", welcomeEntity.data.uname),
-                    styledDocument.getStyle("WelcomeStyle"));
+            mainForm.printMessage("WelcomeStyle",
+                    "[Welcome] %s entered room!", welcomeEntity.data.uname);
         }
     }
 
@@ -105,32 +94,32 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
     public void onWelcomeGuardPackage(WelcomeGuardEntity welcomeGuardEntity) {
         if (config.WelcomeGuard.on) {
             WelcomeGuardEntity.WelcomeGuardEntityData data = welcomeGuardEntity.data;
-            printMessage(String.format("[WelcomeGuard] level %d guard %s entered!", data.guard_level, data.username),
-                    styledDocument.getStyle("WelcomeGuardStyle"));
+            mainForm.printMessage("WelcomeGuardStyle",
+                    "[WelcomeGuard] level %d guard %s entered!", data.guard_level, data.username);
         }
     }
 
     @Override
     public void onLivePackage(LiveEntity liveEntity) {
         if (config.Live.on) {
-            printMessage(String.format("[Live] Room %d start live!", liveEntity.roomid),
-                    styledDocument.getStyle("LiveStyle"));
+            mainForm.printMessage("LiveStyle",
+                    "[Live] Room %d start live!", liveEntity.roomid);
         }
     }
 
     @Override
     public void onPreparingPackage(PreparingEntity preparingEntity) {
         if (config.Preparing.on) {
-            printMessage(String.format("[Preparing] Room %d stop live!", preparingEntity.roomid),
-                    styledDocument.getStyle("PreparingStyle"));
+            mainForm.printMessage("PreparingStyle",
+                    "[Preparing] Room %d stop live!", preparingEntity.roomid);
         }
     }
 
     @Override
     public void onRoomAdminsPackage(RoomAdminsEntity roomAdminsEntity) {
         if (config.RoomAdmins.on) {
-            printMessage(String.format("There are %d room admins.", roomAdminsEntity.uids.length),
-                    styledDocument.getStyle("RoomAdminsStyle"));
+            mainForm.printMessage("RoomAdminsStyle",
+                    "There are %d room admins.", roomAdminsEntity.uids.length);
         }
     }
 }

@@ -2,8 +2,9 @@ package com.hiczp.bilibili.live.danmuji.ui;
 
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmuji.Config;
+import com.hiczp.bilibili.live.danmuji.DanMuJi;
 import com.hiczp.bilibili.live.danmuji.LiveDanMuCallback;
-import com.hiczp.bilibili.live.danmuji.Main;
+import com.hiczp.bilibili.live.danmuji.WindowManager;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
@@ -27,12 +28,12 @@ public class MainForm extends JFrame {
     private static final String FORM_TITLE = "DanMuJi";
     private static final String BILIBILI_LIVE_URL_PREFIX = "http://live.bilibili.com/";
 
-    private Config config = Main.getConfig();
+    private Config config = DanMuJi.getConfig();
     private JPanel mainFormJPanel;
-    private JTextField textField;
+    private JTextField jTextField;
     private JButton startButton;
     private JButton stopButton;
-    private JTextPane textPane;
+    private JTextPane jTextPane;
     private JPanel mainOperationJPanel;
 
     private LiveDanMuReceiver liveDanMuReceiver;
@@ -71,11 +72,11 @@ public class MainForm extends JFrame {
         //监听器
         operationArea.addItemListener(itemEvent -> mainOperationJPanel.setVisible(operationArea.isSelected()));
 
-        clearText.addActionListener(itemEvent -> textPane.setText(""));
+        clearText.addActionListener(itemEvent -> jTextPane.setText(""));
 
         exit.addActionListener(actionEvent -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 
-        outputSetting.addActionListener(actionEvent -> new OutputSettingForm());
+        outputSetting.addActionListener(actionEvent -> WindowManager.createOutputSettingForm());
 
         checkUpdates.addActionListener(actionEvent -> {
             try {
@@ -85,7 +86,7 @@ public class MainForm extends JFrame {
             }
         });
 
-        about.addActionListener(actionEvent -> new AboutDialog());
+        about.addActionListener(actionEvent -> WindowManager.createAboutDialog());
     }
 
     {
@@ -97,12 +98,12 @@ public class MainForm extends JFrame {
 
     public MainForm() {
         //变量
-        styledDocument = textPane.getStyledDocument();
-        textField.setText(config.roomId);
-        textField.setCaretPosition(textField.getText().length());
+        styledDocument = jTextPane.getStyledDocument();
+        jTextField.setText(config.roomId);
+        jTextField.setCaretPosition(jTextField.getText().length());
 
         //监听器
-        textField.addKeyListener(new KeyAdapter() {
+        jTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent keyEvent) {
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -112,10 +113,11 @@ public class MainForm extends JFrame {
         });
 
         startButton.addActionListener(actionEvent -> {
+            Config.userWantDisconnect = false;
             try {
-                liveDanMuReceiver = new LiveDanMuReceiver(BILIBILI_LIVE_URL_PREFIX + textField.getText())
+                liveDanMuReceiver = new LiveDanMuReceiver(BILIBILI_LIVE_URL_PREFIX + jTextField.getText())
                         .setPrintDebugInfo(config.debug)
-                        .addCallback(new LiveDanMuCallback(this, textPane))
+                        .addCallback(new LiveDanMuCallback())
                         .connect();
             } catch (IOException | IllegalArgumentException e) {
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
@@ -125,6 +127,7 @@ public class MainForm extends JFrame {
         });
 
         stopButton.addActionListener(actionEvent -> {
+            Config.userWantDisconnect = true;
             try {
                 liveDanMuReceiver.close();
             } catch (IOException e) {
@@ -139,10 +142,13 @@ public class MainForm extends JFrame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
-                config.roomId = textField.getText();
+                config.roomId = jTextField.getText();
                 config.storeToFile();
             }
         });
+
+        //加载文字设置
+        reloadStyle();
 
         //显示窗口
         setTitle(FORM_TITLE);
@@ -153,23 +159,39 @@ public class MainForm extends JFrame {
         setVisible(true);
     }
 
-    private void printInfo(String message, Object... objects) {
+    public void printInfo(String info, Object... objects) {
         try {
-            styledDocument.insertString(styledDocument.getLength(), String.format("[%s] ", new Date()) + String.format(message, objects) + "\n", null);
+            styledDocument.insertString(styledDocument.getLength(), String.format("[%s] ", new Date()) + String.format(info, objects) + "\n", null);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void printMessage(String style, String message, Object... objects) {
+        printMessage(styledDocument.getStyle(style), message, objects);
+    }
+
+    public void printMessage(Style style, String message, Object... objects) {
+        try {
+            boolean isInEnd = jTextPane.getCaretPosition() == jTextPane.getText().length();
+            styledDocument.insertString(styledDocument.getLength(), String.format(message + "\n", objects), style);
+            if (isInEnd) {
+                jTextPane.setCaretPosition(jTextPane.getText().length());   //如果光标在最后则自动滚屏
+            }
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
     }
 
     public void onConnect() {
-        textField.setEnabled(false);
+        jTextField.setEnabled(false);
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
     }
 
     public void onDisconnect() {
         stopButton.setEnabled(false);
-        textField.setEnabled(true);
+        jTextField.setEnabled(true);
         startButton.setEnabled(true);
         setTitle(FORM_TITLE);
     }
@@ -191,6 +213,10 @@ public class MainForm extends JFrame {
                 });
     }
 
+    public LiveDanMuReceiver getLiveDanMuReceiver() {
+        return liveDanMuReceiver;
+    }
+
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -203,18 +229,18 @@ public class MainForm extends JFrame {
         mainFormJPanel.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
         final JScrollPane scrollPane1 = new JScrollPane();
         mainFormJPanel.add(scrollPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 300), null, 0, false));
-        textPane = new JTextPane();
-        textPane.setEditable(false);
-        scrollPane1.setViewportView(textPane);
+        jTextPane = new JTextPane();
+        jTextPane.setEditable(false);
+        scrollPane1.setViewportView(jTextPane);
         mainOperationJPanel = new JPanel();
         mainOperationJPanel.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));
         mainFormJPanel.add(mainOperationJPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 1, false));
         final JLabel label1 = new JLabel();
         label1.setText("http://live.bilibili.com/");
         mainOperationJPanel.add(label1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        textField = new JTextField();
-        textField.setText("");
-        mainOperationJPanel.add(textField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
+        jTextField = new JTextField();
+        jTextField.setText("");
+        mainOperationJPanel.add(jTextField, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         startButton = new JButton();
         startButton.setText("Start");
         mainOperationJPanel.add(startButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));

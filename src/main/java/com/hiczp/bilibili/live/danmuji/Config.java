@@ -13,6 +13,7 @@ import java.io.IOException;
 public class Config {
     public static final String CONFIG_FILE_NAME = "config.json";
     public static final String GITHUB_REPOSITORY = "https://github.com/czp3009/danmuji";
+    public static boolean userWantDisconnect = false;
 
     public boolean debug = false;
     public String roomId;

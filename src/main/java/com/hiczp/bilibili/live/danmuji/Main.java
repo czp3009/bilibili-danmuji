@@ -2,7 +2,6 @@ package com.hiczp.bilibili.live.danmuji;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
-import com.hiczp.bilibili.live.danmuji.ui.MainForm;
 
 import javax.swing.*;
 import java.io.File;
@@ -14,12 +13,9 @@ import java.io.IOException;
  * Created by czp on 17-5-31.
  */
 public class Main {
-    private static Config config;
-    private static MainForm mainForm;
-
     public static void main(String[] args) {
         //读取配置
-        config = new Config();  //默认配置
+        Config config = new Config();  //默认配置
         File file = new File(Config.CONFIG_FILE_NAME);
         if (file.exists()) {
             try (FileInputStream fileInputStream = new FileInputStream(file)) {
@@ -44,6 +40,7 @@ public class Main {
                 e.printStackTrace();
             }
         }
+        DanMuJi.setConfig(config);
 
         //设定主题
         String lookAndFeelName = null;
@@ -62,15 +59,6 @@ public class Main {
         }
 
         //启动主窗体
-        mainForm = new MainForm();
-        mainForm.reloadStyle();
-    }
-
-    public static Config getConfig() {
-        return config;
-    }
-
-    public static MainForm getMainForm() {
-        return mainForm;
+        WindowManager.createMainForm();
     }
 }

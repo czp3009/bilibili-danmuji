@@ -1,7 +1,8 @@
 package com.hiczp.bilibili.live.danmuji.ui;
 
 import com.hiczp.bilibili.live.danmuji.Config;
-import com.hiczp.bilibili.live.danmuji.Main;
+import com.hiczp.bilibili.live.danmuji.DanMuJi;
+import com.hiczp.bilibili.live.danmuji.WindowManager;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
@@ -108,7 +109,7 @@ public class OutputSettingForm extends JFrame {
                 .forEach(field -> {
                     try {
                         String fieldName = field.getName();
-                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(Main.getConfig());
+                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(DanMuJi.getConfig());
                         JSpinner size = (JSpinner) outputSettingForm.getDeclaredField(fieldName + "Size").get(this);
                         size.setValue(outputOptions.size);
                         JSpinner r = (JSpinner) outputSettingForm.getDeclaredField(fieldName + "R").get(this);
@@ -132,7 +133,7 @@ public class OutputSettingForm extends JFrame {
                 .forEach(field -> {
                     try {
                         String fieldName = field.getName();
-                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(Main.getConfig());
+                        Config.OutputOptions outputOptions = (Config.OutputOptions) field.get(DanMuJi.getConfig());
                         JSpinner size = (JSpinner) outputSettingForm.getDeclaredField(fieldName + "Size").get(this);
                         outputOptions.size = (int) size.getValue();
                         JSpinner r = (JSpinner) outputSettingForm.getDeclaredField(fieldName + "R").get(this);
@@ -145,7 +146,7 @@ public class OutputSettingForm extends JFrame {
                         e.printStackTrace();
                     }
                 });
-        Main.getMainForm().reloadStyle();
+        WindowManager.getMainForm().reloadStyle();
     }
 
     /**
