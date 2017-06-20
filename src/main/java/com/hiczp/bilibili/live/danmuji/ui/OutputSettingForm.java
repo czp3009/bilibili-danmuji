@@ -8,7 +8,6 @@ import com.intellij.uiDesigner.core.GridLayoutManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 /**
@@ -83,17 +82,17 @@ public class OutputSettingForm extends JFrame {
     }
 
     public OutputSettingForm() {
-        setupDate();
+        loadData();
 
         //监听器
-        cancelButton.addActionListener(actionEvent -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
+        cancelButton.addActionListener(actionEvent -> dispose());
 
         saveButton.addActionListener(actionEvent -> {
-            storeDate();
-            dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+            storeData();
+            dispose();
         });
 
-        applyButton.addActionListener(actionEvent -> storeDate());
+        applyButton.addActionListener(actionEvent -> storeData());
 
         setTitle("OutputSettingForm");
         setContentPane(configFormJPanel);
@@ -102,7 +101,7 @@ public class OutputSettingForm extends JFrame {
         setVisible(true);
     }
 
-    private void setupDate() {
+    private void loadData() {
         Class outputSettingForm = OutputSettingForm.class;
         Arrays.stream(Config.class.getDeclaredFields())
                 .filter(field -> field.getType() == Config.OutputOptions.class)
@@ -126,7 +125,7 @@ public class OutputSettingForm extends JFrame {
                 });
     }
 
-    private void storeDate() {
+    private void storeData() {
         Class outputSettingForm = OutputSettingForm.class;
         Arrays.stream(Config.class.getDeclaredFields())
                 .filter(field -> field.getType() == Config.OutputOptions.class)

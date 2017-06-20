@@ -1,6 +1,7 @@
 package com.hiczp.bilibili.live.danmuji;
 
 import com.hiczp.bilibili.live.danmuji.ui.AboutDialog;
+import com.hiczp.bilibili.live.danmuji.ui.LoginForm;
 import com.hiczp.bilibili.live.danmuji.ui.MainForm;
 import com.hiczp.bilibili.live.danmuji.ui.OutputSettingForm;
 
@@ -25,5 +26,9 @@ public class WindowManager {
 
     public static OutputSettingForm createOutputSettingForm() {
         return new OutputSettingForm();
+    }
+
+    public static LoginForm createLoginForm() {
+        return new LoginForm();
     }
 }
