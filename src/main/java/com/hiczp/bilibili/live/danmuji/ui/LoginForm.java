@@ -9,7 +9,6 @@ import com.intellij.uiDesigner.core.Spacer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 
 /**
  * Created by czp on 17-6-21.
@@ -46,8 +45,8 @@ public class LoginForm extends JFrame {
                 } else {
                     JOptionPane.showMessageDialog(this, "Cookies not correct!");
                 }
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(this, "Network error.");
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, String.format("Error! %s: %s", e.getClass().getName(), e.getMessage()));
                 e.printStackTrace();
             }
         });

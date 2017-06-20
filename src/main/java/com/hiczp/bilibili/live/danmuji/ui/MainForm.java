@@ -53,9 +53,6 @@ public class MainForm extends JFrame {
         sendArea.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
         window.add(sendArea);
         window.addSeparator();
-        JMenuItem login = new JMenuItem("Login");
-        window.add(login);
-        window.addSeparator();
         JMenuItem clearText = new JMenuItem("Clear text");
         window.add(clearText);
         window.addSeparator();
@@ -66,6 +63,8 @@ public class MainForm extends JFrame {
         JMenu config = new JMenu("Config");
         JMenuItem outputSetting = new JMenuItem("Output setting");
         config.add(outputSetting);
+        JMenuItem login = new JMenuItem("Login");
+        config.add(login);
         jMenuBar.add(config);
 
         JMenu help = new JMenu("Help");
