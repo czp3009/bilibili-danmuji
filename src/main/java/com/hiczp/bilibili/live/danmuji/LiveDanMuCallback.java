@@ -25,7 +25,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
 
     @Override
     public void onDisconnect() {
-        if (Config.userWantDisconnect) {
+        if (DanMuJi.isUserWantDisconnect()) {
             mainForm.onDisconnect();
             if (config.Disconnect.on) {
                 mainForm.printMessage("DisconnectStyle",
@@ -34,9 +34,9 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
         } else {
             mainForm.printInfo("Reconnecting...");
             try {
-                mainForm.getLiveDanMuReceiver().connect();
+                DanMuJi.getLiveDanMuReceiver().connect();
             } catch (IOException e) {
-                Config.userWantDisconnect = true;
+                DanMuJi.setUserWantDisconnect(true);
                 mainForm.printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 mainForm.printInfo("Abort operation.");
                 e.printStackTrace();

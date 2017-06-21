@@ -3,7 +3,10 @@ package com.hiczp.bilibili.live.danmuji.ui;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuSender;
 import com.hiczp.bilibili.live.danmu.api.entity.DanMuResponseEntity;
-import com.hiczp.bilibili.live.danmuji.*;
+import com.hiczp.bilibili.live.danmuji.Config;
+import com.hiczp.bilibili.live.danmuji.DanMuJi;
+import com.hiczp.bilibili.live.danmuji.LiveDanMuCallback;
+import com.hiczp.bilibili.live.danmuji.WindowManager;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
@@ -38,7 +41,6 @@ public class MainForm extends JFrame {
     private JTextField sendTextField;
     private JPanel sendJPanel;
 
-    private LiveDanMuReceiver liveDanMuReceiver;
     private StyledDocument styledDocument;
 
     //JMenuBar
@@ -130,13 +132,20 @@ public class MainForm extends JFrame {
         });
 
         startButton.addActionListener(actionEvent -> {
-            Config.userWantDisconnect = false;
+            DanMuJi.setUserWantDisconnect(false);
             try {
-                liveDanMuReceiver = new LiveDanMuReceiver(BILIBILI_LIVE_URL_PREFIX + roomURLTextField.getText())
-                        .setPrintDebugInfo(config.debug)
-                        .addCallback(new LiveDanMuCallback())
-                        .connect();
+                String roomURL = BILIBILI_LIVE_URL_PREFIX + roomURLTextField.getText();
+                DanMuJi.setLiveDanMuReceiver(
+                        new LiveDanMuReceiver(roomURL)
+                                .setPrintDebugInfo(config.debug)
+                                .addCallback(new LiveDanMuCallback())
+                                .connect()
+                );
+                DanMuJi.setLiveDanMuSender(
+                        new LiveDanMuSender(roomURL)
+                );
             } catch (IOException | IllegalArgumentException e) {
+                onDisconnect();
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 printInfo("Connect failed!");
                 e.printStackTrace();
@@ -144,9 +153,9 @@ public class MainForm extends JFrame {
         });
 
         stopButton.addActionListener(actionEvent -> {
-            Config.userWantDisconnect = true;
+            DanMuJi.setUserWantDisconnect(true);
             try {
-                liveDanMuReceiver.close();
+                DanMuJi.getLiveDanMuReceiver().close();
             } catch (IOException e) {
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 printInfo("Cannot close connection, reopen program may solve this problem.");
@@ -179,14 +188,10 @@ public class MainForm extends JFrame {
                 printInfo("Please input message.");
                 return;
             }
-            LiveDanMuSender liveDanMuSender = LiveDanMuSenderHolder.getLiveDanMuSender();
-            if (liveDanMuSender == null) {
-                liveDanMuSender = new LiveDanMuSender(BILIBILI_LIVE_URL_PREFIX + roomURLTextField.getText());
-                LiveDanMuSenderHolder.setLiveDanMuSender(liveDanMuSender);
-            }
+            LiveDanMuSender liveDanMuSender = DanMuJi.getLiveDanMuSender();
             if (!liveDanMuSender.isCookiesSet()) {
                 if (config.cookies == null || config.cookies.equals("")) {
-                    JOptionPane.showMessageDialog(this, "You must login first!");
+                    JOptionPane.showMessageDialog(this, "You must login first!", "Warning", JOptionPane.WARNING_MESSAGE);
                     WindowManager.createLoginForm();
                     return;
                 } else {
@@ -196,10 +201,10 @@ public class MainForm extends JFrame {
             sendTextField.setText("");
             new Thread(() -> {
                 try {
-                    DanMuResponseEntity danMuResponseEntity = LiveDanMuSenderHolder.getLiveDanMuSender().send(message);
+                    DanMuResponseEntity danMuResponseEntity = liveDanMuSender.send(message);
                     switch (danMuResponseEntity.code) {
                         case -101: {
-                            JOptionPane.showMessageDialog(this, "Credentials error!");
+                            JOptionPane.showMessageDialog(this, "Credentials error!", "Error", JOptionPane.ERROR_MESSAGE);
                             WindowManager.createLoginForm();
                         }
                         break;
@@ -218,9 +223,11 @@ public class MainForm extends JFrame {
                         }
                     }
                 } catch (IOException e) {
-                    printInfo("%s: %s", e.getClass().getName(), e.getMessage());
-                    printInfo("Send bullet screen failed!");
-                    e.printStackTrace();
+                    if (!DanMuJi.isUserWantDisconnect()) {
+                        printInfo("%s: %s", e.getClass().getName(), e.getMessage());
+                        printInfo("Send bullet screen failed!");
+                        e.printStackTrace();
+                    }
                 }
             }).start();
         });
@@ -278,6 +285,19 @@ public class MainForm extends JFrame {
     }
 
     public void onDisconnect() {
+        LiveDanMuReceiver liveDanMuReceiver = DanMuJi.getLiveDanMuReceiver();
+        if (liveDanMuReceiver != null) {
+            try {
+                liveDanMuReceiver.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                DanMuJi.setLiveDanMuReceiver(null);
+            }
+        }
+        if (DanMuJi.getLiveDanMuSender() != null) {
+            DanMuJi.setLiveDanMuSender(null);
+        }
         stopButton.setEnabled(false);
         roomURLTextField.setEnabled(true);
         startButton.setEnabled(true);
@@ -300,10 +320,6 @@ public class MainForm extends JFrame {
                         e.printStackTrace();
                     }
                 });
-    }
-
-    public LiveDanMuReceiver getLiveDanMuReceiver() {
-        return liveDanMuReceiver;
     }
 
     /**

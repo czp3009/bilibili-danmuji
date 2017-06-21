@@ -43,10 +43,10 @@ public class LoginForm extends JFrame {
                 if (isValid) {
                     JOptionPane.showMessageDialog(this, "Cookies valid!");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Cookies not correct!");
+                    JOptionPane.showMessageDialog(this, "Cookies not correct!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, String.format("Error! %s: %s", e.getClass().getName(), e.getMessage()));
+                JOptionPane.showMessageDialog(this, String.format("Error! %s: %s", e.getClass().getName(), e.getMessage()), "Error", JOptionPane.ERROR_MESSAGE);
                 e.printStackTrace();
             }
         });
