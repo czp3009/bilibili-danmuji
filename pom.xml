@@ -7,7 +7,7 @@
     <groupId>com.hiczp</groupId>
     <artifactId>bilibili-live-danmuji</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.1</version>
+    <version>2.0.0</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.hiczp</groupId>
             <artifactId>bilibili-live-danmu-api</artifactId>
-            <version>2.0.5</version>
+            <version>2.1.0</version>
         </dependency>
     </dependencies>
 

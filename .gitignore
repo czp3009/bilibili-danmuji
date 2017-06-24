@@ -1,5 +1,6 @@
-.idea
-target
-out
-*.iml
-config.json
+/.idea
+/target
+/out
+/*.iml
+/config.json
+/plugin

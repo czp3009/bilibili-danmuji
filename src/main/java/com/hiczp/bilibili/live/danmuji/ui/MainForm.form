@@ -21,6 +21,8 @@
             <constraints/>
             <properties>
               <editable value="false"/>
+              <enabled value="true"/>
+              <inheritsPopupMenu value="false"/>
             </properties>
           </component>
         </children>

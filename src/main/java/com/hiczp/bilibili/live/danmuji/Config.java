@@ -11,7 +11,7 @@ import java.io.IOException;
  * Created by czp on 17-6-2.
  */
 public class Config {
-    public static final String CONFIG_FILE_NAME = "config.json";
+    public static final File CONFIG_FILE = new File("config.json");
     public static final String GITHUB_REPOSITORY = "https://github.com/czp3009/danmuji";
     public static final int DANMU_MAX_LENGTH = 20;
 
@@ -44,20 +44,26 @@ public class Config {
     }
 
     public void storeToFile() {
-        File file = new File(CONFIG_FILE_NAME);
-        if (!file.exists()) {
+        if (!CONFIG_FILE.exists()) {
             try {
-                if (!file.createNewFile()) {
-                    System.out.println("Cannot write config file to disk!");
+                if (!CONFIG_FILE.createNewFile()) {
+                    System.out.println("File already exists: " + CONFIG_FILE.getAbsolutePath());
                 }
             } catch (IOException e) {
+                System.out.println("Cannot create config file on disk: " + CONFIG_FILE.getAbsolutePath());
                 e.printStackTrace();
+                return;
             }
         }
+        if (!CONFIG_FILE.canWrite()) {
+            System.out.println("Cannot write config file: " + CONFIG_FILE.getAbsolutePath());
+            return;
+        }
         try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            FileOutputStream fileOutputStream = new FileOutputStream(CONFIG_FILE);
             fileOutputStream.write(JSON.toJSONBytes(this));
             fileOutputStream.flush();
+            System.out.println("Write configuration to file: " + CONFIG_FILE.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }

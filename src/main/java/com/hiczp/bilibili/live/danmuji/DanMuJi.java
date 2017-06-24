@@ -46,4 +46,20 @@ public class DanMuJi {
     public static void setUserWantDisconnect(boolean userWantDisconnect) {
         DanMuJi.userWantDisconnect = userWantDisconnect;
     }
+
+    public static boolean isLiveDanMuSenderAvailable() {
+        if (liveDanMuSender == null) {
+            return false;
+        }
+        if (!liveDanMuSender.isCookiesSet()) {
+            String cookies = DanMuJi.getConfig().cookies;
+            if (cookies != null && !cookies.equals("")) {
+                liveDanMuSender.setCookies(cookies);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
 }

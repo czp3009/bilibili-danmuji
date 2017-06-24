@@ -14,6 +14,18 @@ Maven 3.3.9
 
 点击 Stop 按钮断开连接.
 
+上方菜单栏包含清屏, 隐藏一些区域, 设置等多种功能, 详情不赘述.
+
+# 插件使用
+将插件 jar 放入弹幕姬工作目录下的 ./plugin/ 文件夹.
+
+# 插件编写
+插件内有且仅有一个类(此类即为插件主类)继承于 AbstractDanMuJiPlugin , 并拥有 @DanMuJiPlugin 注解即可被识别为插件.
+
+主类需实现 AbstractDanMuJiPlugin 中的方法, 这些方法在各个阶段被调用.
+
+插件需要打包为 jar 格式, 主类可以放在任何位置, 插件 jar 包中的全部类会被加载.
+
 # B站弹幕协议
 见此项目 https://github.com/czp3009/bilibili_live_danmu_api
 

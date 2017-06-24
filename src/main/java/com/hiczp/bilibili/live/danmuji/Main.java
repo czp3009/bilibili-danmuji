@@ -6,7 +6,6 @@ import com.alibaba.fastjson.JSONException;
 import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -16,29 +15,18 @@ public class Main {
     public static void main(String[] args) {
         //读取配置
         Config config = new Config();  //默认配置
-        File file = new File(Config.CONFIG_FILE_NAME);
-        if (file.exists()) {
-            try (FileInputStream fileInputStream = new FileInputStream(file)) {
+        File configFile = Config.CONFIG_FILE;
+        if (configFile.exists()) {
+            try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
                 config = JSON.parseObject(fileInputStream, Config.class);
-                System.out.println("Read configuration from file!");
+                System.out.println("Read configuration from file: " + configFile.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 System.out.println("Config file invalid!");
             }
         } else {
-            try {
-                if (!file.createNewFile()) {
-                    System.out.println("Cannot create config file on disk!");
-                }
-                try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
-                    fileOutputStream.write(JSON.toJSONBytes(config));
-                    fileOutputStream.flush();
-                    System.out.println("Written configuration to file!");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            config.storeToFile();
         }
         DanMuJi.setConfig(config);
 
@@ -58,7 +46,13 @@ public class Main {
             }
         }
 
-        //启动主窗体
+        //创建主窗体
         WindowManager.createMainForm();
+
+        //加载插件
+        PluginManager.loadPlugins();
+
+        //显示主窗体
+        WindowManager.getMainForm().setVisible(true);
     }
 }

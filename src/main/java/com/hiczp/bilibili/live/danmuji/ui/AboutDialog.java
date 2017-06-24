@@ -53,7 +53,6 @@ public class AboutDialog extends JDialog {
         setTitle("About DanMuJi");
         setLocationRelativeTo(null);
         pack();
-        setVisible(true);
     }
 
     private void openURL(String url) {

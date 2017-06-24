@@ -3,10 +3,7 @@ package com.hiczp.bilibili.live.danmuji.ui;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuSender;
 import com.hiczp.bilibili.live.danmu.api.entity.DanMuResponseEntity;
-import com.hiczp.bilibili.live.danmuji.Config;
-import com.hiczp.bilibili.live.danmuji.DanMuJi;
-import com.hiczp.bilibili.live.danmuji.LiveDanMuCallback;
-import com.hiczp.bilibili.live.danmuji.WindowManager;
+import com.hiczp.bilibili.live.danmuji.*;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
@@ -22,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Vector;
 
 /**
  * Created by czp on 17-5-31.
@@ -41,7 +39,9 @@ public class MainForm extends JFrame {
     private JTextField sendTextField;
     private JPanel sendJPanel;
 
+    private JMenu pluginConfigMenu;
     private StyledDocument styledDocument;
+    private Vector<Thread> danMuSendingThreads;
 
     //JMenuBar
     {
@@ -69,6 +69,17 @@ public class MainForm extends JFrame {
         config.add(login);
         jMenuBar.add(config);
 
+        JMenu plugin = new JMenu("Plugin");
+        pluginConfigMenu = new JMenu("Plugin config");
+        pluginConfigMenu.setEnabled(false);
+        plugin.add(pluginConfigMenu);
+        plugin.addSeparator();
+        JMenuItem pluginList = new JMenuItem("Plugin list");
+        plugin.add(pluginList);
+        JMenuItem reload = new JMenuItem("Reload");
+        plugin.add(reload);
+        jMenuBar.add(plugin);
+
         JMenu help = new JMenu("Help");
         JMenuItem checkUpdates = new JMenuItem("Check updates");
         help.add(checkUpdates);
@@ -89,13 +100,17 @@ public class MainForm extends JFrame {
             }
         });
 
-        login.addActionListener(actionEvent -> WindowManager.createLoginForm());
-
         clearText.addActionListener(itemEvent -> jTextPane.setText(""));
 
         exit.addActionListener(actionEvent -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
 
-        outputSetting.addActionListener(actionEvent -> WindowManager.createOutputSettingForm());
+        outputSetting.addActionListener(actionEvent -> WindowManager.createAndDisplayOutputSettingForm());
+
+        login.addActionListener(actionEvent -> WindowManager.createAndDisplayLoginForm());
+
+        pluginList.addActionListener(actionEvent -> WindowManager.createAndDisplayPluginListDialog());
+
+        reload.addActionListener(actionEvent -> PluginManager.reloadPlugins());
 
         checkUpdates.addActionListener(actionEvent -> {
             try {
@@ -105,7 +120,7 @@ public class MainForm extends JFrame {
             }
         });
 
-        about.addActionListener(actionEvent -> WindowManager.createAboutDialog());
+        about.addActionListener(actionEvent -> WindowManager.createAndDisplayAboutDialog());
     }
 
     {
@@ -141,9 +156,19 @@ public class MainForm extends JFrame {
                                 .addCallback(new LiveDanMuCallback())
                                 .connect()
                 );
-                DanMuJi.setLiveDanMuSender(
-                        new LiveDanMuSender(roomURL)
-                );
+                LiveDanMuSender liveDanMuSender = new LiveDanMuSender(roomURL);
+                if (config.cookies != null && !config.cookies.equals("")) {
+                    liveDanMuSender.setCookies(config.cookies);
+                }
+                DanMuJi.setLiveDanMuSender(liveDanMuSender);
+                PluginManager.getPluginList().forEach(plugin -> {
+                    try {
+                        plugin.onStart();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+                danMuSendingThreads = new Vector<>();
             } catch (IOException | IllegalArgumentException e) {
                 onDisconnect();
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
@@ -157,12 +182,19 @@ public class MainForm extends JFrame {
             try {
                 DanMuJi.getLiveDanMuReceiver().close();
             } catch (IOException e) {
-                printInfo("%s: %s", e.getClass().getName(), e.getMessage());
-                printInfo("Cannot close connection, reopen program may solve this problem.");
-                e.printStackTrace();
-            } finally {
                 onDisconnect();
+                printInfo("%s: %s", e.getClass().getName(), e.getMessage());
+                printInfo("Cannot close connection, restart program may solve this problem.");
+                e.printStackTrace();
             }
+            PluginManager.getPluginList().forEach(plugin -> {
+                try {
+                    plugin.onStop();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            stopAllDanMuSendingThreads();
         });
 
         sendTextField.addKeyListener(new KeyAdapter() {
@@ -188,31 +220,27 @@ public class MainForm extends JFrame {
                 printInfo("Please input message.");
                 return;
             }
-            LiveDanMuSender liveDanMuSender = DanMuJi.getLiveDanMuSender();
-            if (!liveDanMuSender.isCookiesSet()) {
-                if (config.cookies == null || config.cookies.equals("")) {
-                    JOptionPane.showMessageDialog(this, "You must login first!", "Warning", JOptionPane.WARNING_MESSAGE);
-                    WindowManager.createLoginForm();
-                    return;
-                } else {
-                    liveDanMuSender.setCookies(config.cookies);
-                }
+            if (!DanMuJi.isLiveDanMuSenderAvailable()) {
+                JOptionPane.showMessageDialog(this, "You must login first!", "Warning", JOptionPane.WARNING_MESSAGE);
+                WindowManager.createAndDisplayLoginForm();
+                return;
             }
             sendTextField.setText("");
             new Thread(() -> {
+                danMuSendingThreads.add(Thread.currentThread());
                 try {
-                    DanMuResponseEntity danMuResponseEntity = liveDanMuSender.send(message);
+                    DanMuResponseEntity danMuResponseEntity = DanMuJi.getLiveDanMuSender().send(message);
                     switch (danMuResponseEntity.code) {
-                        case -101: {
+                        case DanMuResponseEntity.NO_LOGIN: {
                             JOptionPane.showMessageDialog(this, "Credentials error!", "Error", JOptionPane.ERROR_MESSAGE);
-                            WindowManager.createLoginForm();
+                            WindowManager.createAndDisplayLoginForm();
                         }
                         break;
-                        case -500: {
+                        case DanMuResponseEntity.OUT_OF_LENGTH: {
                             printInfo("Bullet screen only can contains up to %d Unicode characters!", Config.DANMU_MAX_LENGTH);
                         }
                         break;
-                        case 0: {
+                        case DanMuResponseEntity.SUCCESS: {
                             if (!danMuResponseEntity.msg.equals("")) {
                                 printInfo(danMuResponseEntity.msg);
                             }
@@ -228,6 +256,8 @@ public class MainForm extends JFrame {
                         printInfo("Send bullet screen failed!");
                         e.printStackTrace();
                     }
+                } finally {
+                    danMuSendingThreads.remove(Thread.currentThread());
                 }
             }).start();
         });
@@ -236,7 +266,17 @@ public class MainForm extends JFrame {
             @Override
             public void windowClosing(WindowEvent windowEvent) {
                 config.roomId = roomURLTextField.getText();
+                PluginManager.unloadPlugins();
                 config.storeToFile();
+                LiveDanMuReceiver liveDanMuReceiver = DanMuJi.getLiveDanMuReceiver();
+                if (liveDanMuReceiver != null) {
+                    try {
+                        DanMuJi.getLiveDanMuReceiver().close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                stopAllDanMuSendingThreads();
             }
         });
 
@@ -249,15 +289,24 @@ public class MainForm extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         pack();
-        setVisible(true);
+    }
+
+    private void stopAllDanMuSendingThreads() {
+        danMuSendingThreads.forEach(thread -> {
+            try {
+                thread.interrupt();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public void printInfo(String info, Object... objects) {
-        try {
-            styledDocument.insertString(styledDocument.getLength(), String.format("[%s] ", new Date()) + String.format(info, objects) + "\n", null);
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
+        printMessage(String.format("[%s] %s", new Date(), String.format(info, objects)));
+    }
+
+    public void printMessage(String message, Object... objects) {
+        printMessage(styledDocument.getStyle(StyleContext.DEFAULT_STYLE), message, objects);
     }
 
     public void printMessage(String style, String message, Object... objects) {
@@ -285,19 +334,8 @@ public class MainForm extends JFrame {
     }
 
     public void onDisconnect() {
-        LiveDanMuReceiver liveDanMuReceiver = DanMuJi.getLiveDanMuReceiver();
-        if (liveDanMuReceiver != null) {
-            try {
-                liveDanMuReceiver.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                DanMuJi.setLiveDanMuReceiver(null);
-            }
-        }
-        if (DanMuJi.getLiveDanMuSender() != null) {
-            DanMuJi.setLiveDanMuSender(null);
-        }
+        DanMuJi.setLiveDanMuReceiver(null);
+        DanMuJi.setLiveDanMuSender(null);
         stopButton.setEnabled(false);
         roomURLTextField.setEnabled(true);
         startButton.setEnabled(true);
@@ -322,6 +360,14 @@ public class MainForm extends JFrame {
                 });
     }
 
+    public StyledDocument getStyledDocument() {
+        return styledDocument;
+    }
+
+    public JMenu getPluginConfigMenu() {
+        return pluginConfigMenu;
+    }
+
     /**
      * Method generated by IntelliJ IDEA GUI Designer
      * >>> IMPORTANT!! <<<
@@ -336,6 +382,8 @@ public class MainForm extends JFrame {
         mainFormJPanel.add(scrollPane1, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, new Dimension(-1, 300), null, 0, false));
         jTextPane = new JTextPane();
         jTextPane.setEditable(false);
+        jTextPane.setEnabled(true);
+        jTextPane.setInheritsPopupMenu(false);
         scrollPane1.setViewportView(jTextPane);
         operationJPanel = new JPanel();
         operationJPanel.setLayout(new GridLayoutManager(1, 4, new Insets(0, 0, 0, 0), -1, -1));

@@ -55,7 +55,6 @@ public class LoginForm extends JFrame {
         setContentPane(loginFormJPanel);
         setLocationRelativeTo(null);
         pack();
-        setVisible(true);
     }
 
     private void loadData() {
@@ -63,7 +62,12 @@ public class LoginForm extends JFrame {
     }
 
     private void saveData() {
-        config.cookies = cookiesTextArea.getText().replace("\n", "");
+        String cookies = cookiesTextArea.getText().replace("\n", "");
+        config.cookies = cookies;
+        LiveDanMuSender liveDanMuSender = DanMuJi.getLiveDanMuSender();
+        if (liveDanMuSender != null) {
+            liveDanMuSender.setCookies(cookies);
+        }
     }
 
     /**

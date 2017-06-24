@@ -98,7 +98,6 @@ public class OutputSettingForm extends JFrame {
         setContentPane(configFormJPanel);
         setLocationRelativeTo(null);
         pack();
-        setVisible(true);
     }
 
     private void loadData() {
