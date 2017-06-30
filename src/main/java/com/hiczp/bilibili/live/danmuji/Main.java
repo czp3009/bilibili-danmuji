@@ -76,11 +76,10 @@ public class Main {
             DanMuJi.getConfig().storeToFile();
         }));
 
-        //加载插件
-        DanMuJi.reloadPlugins();
-
         //创建主窗体
         MainForm mainForm = WindowManager.createMainForm();
+        //加载插件
+        DanMuJi.reloadPlugins();
         //向主窗体添加插件菜单
         mainForm.addPluginConfigMenuItems(DanMuJi.generatePluginConfigMenuItems());
         //显示主窗体

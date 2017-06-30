@@ -115,6 +115,7 @@ public class MainForm extends JFrame {
             clearPluginConfigMenu();
             DanMuJi.reloadPlugins();
             addPluginConfigMenuItems(DanMuJi.generatePluginConfigMenuItems());
+            printInfo("Plugins loaded: " + DanMuJi.getPluginManager().getPlugins().size());
         });
 
         checkUpdates.addActionListener(actionEvent -> {
