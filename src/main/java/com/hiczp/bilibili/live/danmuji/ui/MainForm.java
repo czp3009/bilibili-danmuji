@@ -161,12 +161,13 @@ public class MainForm extends JFrame {
                     liveDanMuSender.setCookies(config.cookies);
                 }
                 DanMuJi.setLiveDanMuSender(liveDanMuSender);
-                DanMuJi.setLiveDanMuReceiver(
+                //onConnect 回调将在连接成功后立即被执行, 因此需要先 set 再连接
+                LiveDanMuReceiver liveDanMuReceiver =
                         new LiveDanMuReceiver(roomURL)
                                 .setPrintDebugInfo(config.debug)
-                                .addCallback(new LiveDanMuCallback())
-                                .connect()
-                );
+                                .addCallback(new LiveDanMuCallback());
+                DanMuJi.setLiveDanMuReceiver(liveDanMuReceiver);
+                liveDanMuReceiver.connect();
             } catch (IOException | IllegalArgumentException e) {
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 printInfo("Connect failed!");

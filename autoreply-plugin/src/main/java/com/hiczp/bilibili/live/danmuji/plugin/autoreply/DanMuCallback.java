@@ -6,6 +6,8 @@ import com.hiczp.bilibili.live.danmu.api.entity.SendGiftEntity;
 import com.hiczp.bilibili.live.danmuji.Config;
 import com.hiczp.bilibili.live.danmuji.DanMuJi;
 import com.hiczp.bilibili.live.danmuji.ui.MainForm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -13,6 +15,8 @@ import java.io.IOException;
  * Created by czp on 17-6-23.
  */
 public class DanMuCallback extends LiveDanMuCallbackAdapter {
+    private static final Logger log = LoggerFactory.getLogger(DanMuCallback.class);
+
     private MainForm main;
 
     DanMuCallback(MainForm main) {
@@ -50,6 +54,8 @@ public class DanMuCallback extends LiveDanMuCallbackAdapter {
                     e.printStackTrace();
                 }
             }).start();
+        } else {
+            log.error("Must login first.");
         }
     }
 }
