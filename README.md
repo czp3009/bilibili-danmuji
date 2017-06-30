@@ -17,14 +17,20 @@ Maven 3.3.9
 上方菜单栏包含清屏, 隐藏一些区域, 设置等多种功能, 详情不赘述.
 
 # 插件使用
-将插件 jar 放入弹幕姬工作目录下的 ./plugin/ 文件夹.
+将插件 jar 放入弹幕姬工作目录下的 ./plugins/ 文件夹.
 
 # 插件编写
-插件内有且仅有一个类(此类即为插件主类)继承于 AbstractDanMuJiPlugin , 并拥有 @DanMuJiPlugin 注解即可被识别为插件.
+插件系统使用 [pf4j](https://github.com/decebals/pf4j) 实现, 需根据其指定要求编写插件.
 
-主类需实现 AbstractDanMuJiPlugin 中的方法, 这些方法在各个阶段被调用.
+本项目下的 ./test-plugin 为插件编写示例.
 
-插件需要打包为 jar 格式, 主类可以放在任何位置, 插件 jar 包中的全部类会被加载.
+本项目有两个已设定的 ExtensionPoint, 分别为 DanMuJiAction 和 PluginUI.
+
+DanMuJiAction 在弹幕姬执行各种操作和状态改变时被调用.
+
+PluginUI 在插件被加载时调用, 用于生成插件特有的 UI 部分.
+
+插件需要打包为 jar 格式.
 
 # B站弹幕协议
 见此项目 https://github.com/czp3009/bilibili_live_danmu_api

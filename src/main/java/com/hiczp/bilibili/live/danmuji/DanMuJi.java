@@ -7,6 +7,7 @@ import ro.fortsoft.pf4j.JarPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
 import javax.swing.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,13 +77,38 @@ public class DanMuJi {
         return pluginManager;
     }
 
-    public static void reloadPlugins() {
+    public static boolean reloadPlugins() {
         stopPlugins();
+        return loadPlugins();
+    }
+
+    private static boolean createPluginsDirectory() {
+        String pluginDirectory = System.getProperty("pf4j.pluginsDir", "plugins");
+        File file = new File(pluginDirectory);
+        if (file.exists()) {
+            if (file.isFile()) {
+                System.out.printf("Please delete file named %s in work directory before plugins can be loaded!\n", pluginDirectory);
+                return false;
+            }
+        } else {
+            if (!file.mkdirs()) {
+                System.out.println("Cannot create plugin directory in " + file.getAbsolutePath());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean loadPlugins() {
+        if (!createPluginsDirectory()) {
+            return false;
+        }
         System.out.println("Loading plugins...");
         pluginManager = new JarPluginManager();
         pluginManager.loadPlugins();
         System.out.println("Starting plugins...");
         pluginManager.startPlugins();
+        return true;
     }
 
     public static void stopPlugins() {
