@@ -1,6 +1,8 @@
 package com.hiczp.bilibili.live.danmuji;
 
 import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
@@ -14,7 +16,7 @@ public class Config {
     public static final File CONFIG_FILE = new File("config.json");
     public static final String GITHUB_REPOSITORY = "https://github.com/czp3009/danmuji";
     public static final int DANMU_MAX_LENGTH = 20;
-
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
     public boolean debug = false;
     public String roomId;
     public String cookies;
@@ -47,24 +49,24 @@ public class Config {
         if (!CONFIG_FILE.exists()) {
             try {
                 if (!CONFIG_FILE.createNewFile()) {
-                    System.out.println("File already exists: " + CONFIG_FILE.getAbsolutePath());
+                    log.error("File already exists: " + CONFIG_FILE.getAbsolutePath());
                     return false;
                 }
             } catch (IOException e) {
-                System.out.println("Cannot create config file on disk: " + CONFIG_FILE.getAbsolutePath());
+                log.error("Cannot create config file on disk: " + CONFIG_FILE.getAbsolutePath());
                 e.printStackTrace();
                 return false;
             }
         }
         if (!CONFIG_FILE.canWrite()) {
-            System.out.println("Cannot write config file: " + CONFIG_FILE.getAbsolutePath());
+            log.error("Cannot write config file: " + CONFIG_FILE.getAbsolutePath());
             return false;
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(CONFIG_FILE);
             fileOutputStream.write(JSON.toJSONBytes(this));
             fileOutputStream.flush();
-            System.out.println("Write configuration to file: " + CONFIG_FILE.getAbsolutePath());
+            log.debug("Write configuration to file: " + CONFIG_FILE.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
             return false;

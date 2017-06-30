@@ -3,6 +3,7 @@ package com.hiczp.bilibili.live.danmuji.plugin.test;
 import com.hiczp.bilibili.live.danmuji.extension.DanMuJiAction;
 import com.hiczp.bilibili.live.danmuji.extension.PluginUI;
 import com.hiczp.bilibili.live.danmuji.plugin.test.ui.TestForm;
+import org.slf4j.Logger;
 import ro.fortsoft.pf4j.Extension;
 import ro.fortsoft.pf4j.Plugin;
 import ro.fortsoft.pf4j.PluginException;
@@ -14,30 +15,35 @@ import javax.swing.*;
  * Created by czp on 17-6-29.
  */
 public class Main extends Plugin {
+    private static String pluginId;
+    private static Logger log;
+
     public Main(PluginWrapper pluginWrapper) {
         super(pluginWrapper);
+        pluginId = pluginWrapper.getPluginId();
+        log = super.log;
     }
 
     @Override
     public void start() throws PluginException {
-        System.out.println("Test plugin started!");
+        log.info("{} started!", pluginId);
     }
 
     @Override
     public void stop() throws PluginException {
-        System.out.println("Test plugin stopped!");
+        log.info("{} stopped!", pluginId);
     }
 
     @Extension
     public static class TestDanMuJiAction implements DanMuJiAction {
         @Override
         public void connect() {
-            System.out.println("[TestPlugin] Connected!");
+            log.debug("[{}] Connected!\n", pluginId);
         }
 
         @Override
         public void disconnect() {
-            System.out.println("[TestPlugin] Disconnected!");
+            log.debug("[{}] Disconnected!\n", pluginId);
         }
     }
 

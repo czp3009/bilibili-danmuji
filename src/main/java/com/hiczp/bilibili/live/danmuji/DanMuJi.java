@@ -3,6 +3,8 @@ package com.hiczp.bilibili.live.danmuji;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuSender;
 import com.hiczp.bilibili.live.danmuji.extension.PluginUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ro.fortsoft.pf4j.JarPluginManager;
 import ro.fortsoft.pf4j.PluginManager;
 
@@ -15,6 +17,8 @@ import java.util.List;
  * Created by czp on 17-6-20.
  */
 public class DanMuJi {
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
+
     private static Config config;
 
     private static LiveDanMuReceiver liveDanMuReceiver;
@@ -87,12 +91,14 @@ public class DanMuJi {
         File file = new File(pluginDirectory);
         if (file.exists()) {
             if (file.isFile()) {
-                System.out.printf("Please delete file named %s in work directory before plugins can be loaded!\n", pluginDirectory);
+                log.error("Please delete file named %s in work directory before plugins can be loaded!\n", pluginDirectory);
                 return false;
             }
         } else {
-            if (!file.mkdirs()) {
-                System.out.println("Cannot create plugin directory in " + file.getAbsolutePath());
+            if (file.mkdirs()) {
+                log.debug("Create plugin directory: " + file.getAbsolutePath());
+            } else {
+                log.error("Cannot create plugin directory in " + file.getAbsolutePath());
                 return false;
             }
         }
@@ -103,17 +109,14 @@ public class DanMuJi {
         if (!createPluginsDirectory()) {
             return false;
         }
-        System.out.println("Loading plugins...");
         pluginManager = new JarPluginManager();
         pluginManager.loadPlugins();
-        System.out.println("Starting plugins...");
         pluginManager.startPlugins();
         return true;
     }
 
     public static void stopPlugins() {
         if (pluginManager != null) {
-            System.out.println("Stopping plugins...");
             pluginManager.stopPlugins();
         }
     }

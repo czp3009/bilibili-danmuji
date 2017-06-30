@@ -4,6 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmuji.ui.MainForm;
+import org.apache.log4j.BasicConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.File;
@@ -14,18 +17,24 @@ import java.io.IOException;
  * Created by czp on 17-5-31.
  */
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
+
     public static void main(String[] args) {
+        //设定 Logger
+        BasicConfigurator.configure();
+
+        log.info("Starting DanMuJi");
         //读取配置
         Config config = new Config();  //默认配置
         File configFile = Config.CONFIG_FILE;
         if (configFile.exists()) {
             try (FileInputStream fileInputStream = new FileInputStream(configFile)) {
                 config = JSON.parseObject(fileInputStream, Config.class);
-                System.out.println("Read configuration from file: " + configFile.getAbsolutePath());
+                log.debug("Read configuration from file: " + configFile.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
-                System.out.println("Config file invalid!");
+                log.error("Config file invalid! Using default setting instead.");
             }
         } else {
             config.storeToFile();
@@ -50,11 +59,11 @@ public class Main {
 
         //设定程序退出时执行的步骤
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Closing DanMuJi...");
+            log.info("Closing DanMuJi...");
             DanMuJi.setUserWantDisconnect(true);
             LiveDanMuReceiver liveDanMuReceiver = DanMuJi.getLiveDanMuReceiver();
             if (liveDanMuReceiver != null) {
-                System.out.println("Closing connection!");
+                log.debug("Closing connection!");
                 try {
                     liveDanMuReceiver.close();
                 } catch (Exception e) {
