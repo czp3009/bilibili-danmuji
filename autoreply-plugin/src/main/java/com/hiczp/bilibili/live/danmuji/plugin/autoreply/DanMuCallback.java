@@ -5,38 +5,24 @@ import com.hiczp.bilibili.live.danmu.api.entity.DanMuResponseEntity;
 import com.hiczp.bilibili.live.danmu.api.entity.SendGiftEntity;
 import com.hiczp.bilibili.live.danmuji.Config;
 import com.hiczp.bilibili.live.danmuji.DanMuJi;
+import com.hiczp.bilibili.live.danmuji.ui.MainForm;
 
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * Created by czp on 17-6-23.
  */
 public class DanMuCallback extends LiveDanMuCallbackAdapter {
-    private Main main;
-    private Vector<Thread> danMuSendingThreads = new Vector<>();
+    private MainForm main;
 
-    DanMuCallback(Main main) {
+    DanMuCallback(MainForm main) {
         this.main = main;
-    }
-
-    void stopDanMuSendingThreads() {
-        danMuSendingThreads.forEach(thread -> {
-            if (!thread.isInterrupted()) {
-                try {
-                    thread.interrupt();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 
     @Override
     public void onSendGiftPackage(SendGiftEntity sendGiftEntity) {
         if (DanMuJi.isLiveDanMuSenderAvailable()) {
             new Thread(() -> {
-                danMuSendingThreads.add(Thread.currentThread());
                 try {
                     DanMuResponseEntity danMuResponseEntity = DanMuJi.getLiveDanMuSender().send(
                             String.format("感谢 %s 送的 %s", sendGiftEntity.data.uname, sendGiftEntity.data.giftName)
@@ -62,8 +48,6 @@ public class DanMuCallback extends LiveDanMuCallbackAdapter {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    danMuSendingThreads.remove(Thread.currentThread());
                 }
             }).start();
         }

@@ -64,7 +64,6 @@ public class AboutDialog extends JDialog {
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         githubJLabel = new JLabel(String.format("<html>Github: <a href=''>%s</a></html>", Config.GITHUB_REPOSITORY));
     }
 

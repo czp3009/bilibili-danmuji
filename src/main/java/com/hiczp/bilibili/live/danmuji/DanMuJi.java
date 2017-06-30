@@ -2,6 +2,13 @@ package com.hiczp.bilibili.live.danmuji;
 
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuSender;
+import com.hiczp.bilibili.live.danmuji.extension.PluginUI;
+import ro.fortsoft.pf4j.JarPluginManager;
+import ro.fortsoft.pf4j.PluginManager;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by czp on 17-6-20.
@@ -14,6 +21,8 @@ public class DanMuJi {
     private static LiveDanMuSender liveDanMuSender;
 
     private static boolean userWantDisconnect = false;
+
+    private static PluginManager pluginManager;
 
     public static Config getConfig() {
         return config;
@@ -61,5 +70,39 @@ public class DanMuJi {
             }
         }
         return true;
+    }
+
+    public static PluginManager getPluginManager() {
+        return pluginManager;
+    }
+
+    public static void reloadPlugins() {
+        stopPlugins();
+        System.out.println("Loading plugins...");
+        pluginManager = new JarPluginManager();
+        pluginManager.loadPlugins();
+        System.out.println("Starting plugins...");
+        pluginManager.startPlugins();
+    }
+
+    public static void stopPlugins() {
+        if (pluginManager != null) {
+            System.out.println("Stopping plugins...");
+            pluginManager.stopPlugins();
+        }
+    }
+
+    public static List<JMenuItem> generatePluginConfigMenuItems() {
+        List<JMenuItem> jMenuItems = new ArrayList<>();
+        if (pluginManager != null) {
+            pluginManager.getExtensions(PluginUI.class).forEach(pluginUI -> {
+                try {
+                    jMenuItems.add(pluginUI.getPluginConfigMenu());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return jMenuItems;
     }
 }

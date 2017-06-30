@@ -43,21 +43,22 @@ public class Config {
         RoomAdmins.color = Color.BLUE;
     }
 
-    public void storeToFile() {
+    public boolean storeToFile() {
         if (!CONFIG_FILE.exists()) {
             try {
                 if (!CONFIG_FILE.createNewFile()) {
                     System.out.println("File already exists: " + CONFIG_FILE.getAbsolutePath());
+                    return false;
                 }
             } catch (IOException e) {
                 System.out.println("Cannot create config file on disk: " + CONFIG_FILE.getAbsolutePath());
                 e.printStackTrace();
-                return;
+                return false;
             }
         }
         if (!CONFIG_FILE.canWrite()) {
             System.out.println("Cannot write config file: " + CONFIG_FILE.getAbsolutePath());
-            return;
+            return false;
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(CONFIG_FILE);
@@ -66,7 +67,9 @@ public class Config {
             System.out.println("Write configuration to file: " + CONFIG_FILE.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public class OutputOptions {

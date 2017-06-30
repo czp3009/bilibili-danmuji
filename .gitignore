@@ -1,6 +1,5 @@
 /.idea
 /target
 /out
-/*.iml
 /config.json
-/plugin
+/plugins

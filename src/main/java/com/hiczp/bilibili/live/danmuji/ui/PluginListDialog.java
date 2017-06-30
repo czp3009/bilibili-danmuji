@@ -1,12 +1,16 @@
 package com.hiczp.bilibili.live.danmuji.ui;
 
-import com.hiczp.bilibili.live.danmuji.PluginManager;
+import com.hiczp.bilibili.live.danmuji.DanMuJi;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import ro.fortsoft.pf4j.PluginDescriptor;
+import ro.fortsoft.pf4j.PluginWrapper;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
+
 
 public class PluginListDialog extends JDialog {
     private JPanel contentPane;
@@ -20,11 +24,15 @@ public class PluginListDialog extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
+        List<PluginWrapper> pluginWrappers = DanMuJi.getPluginManager().getPlugins();
         DefaultListModel<String> defaultListModel = new DefaultListModel<>();
-        PluginManager.getPluginList().forEach(abstractDanMuJiPlugin -> defaultListModel.addElement(String.format("%s %s", abstractDanMuJiPlugin.getName(), abstractDanMuJiPlugin.getVersion())));
+        pluginWrappers.forEach(pluginWrapper -> {
+            PluginDescriptor pluginDescriptor = pluginWrapper.getDescriptor();
+            defaultListModel.addElement(String.format("%s %s", pluginDescriptor.getPluginId(), pluginDescriptor.getVersion()));
+        });
         list.setModel(defaultListModel);
 
-        totalLabel.setText("Total: " + PluginManager.getPluginCount());
+        totalLabel.setText("Total: " + pluginWrappers.size());
 
         buttonOK.addActionListener(actionEvent -> dispose());
 

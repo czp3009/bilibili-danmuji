@@ -3,7 +3,11 @@ package com.hiczp.bilibili.live.danmuji.ui;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
 import com.hiczp.bilibili.live.danmu.api.LiveDanMuSender;
 import com.hiczp.bilibili.live.danmu.api.entity.DanMuResponseEntity;
-import com.hiczp.bilibili.live.danmuji.*;
+import com.hiczp.bilibili.live.danmuji.Config;
+import com.hiczp.bilibili.live.danmuji.DanMuJi;
+import com.hiczp.bilibili.live.danmuji.LiveDanMuCallback;
+import com.hiczp.bilibili.live.danmuji.WindowManager;
+import com.hiczp.bilibili.live.danmuji.extension.DanMuJiAction;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 
@@ -12,14 +16,12 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 /**
  * Created by czp on 17-5-31.
@@ -41,7 +43,6 @@ public class MainForm extends JFrame {
 
     private JMenu pluginConfigMenu;
     private StyledDocument styledDocument;
-    private Vector<Thread> danMuSendingThreads;
 
     //JMenuBar
     {
@@ -102,7 +103,7 @@ public class MainForm extends JFrame {
 
         clearText.addActionListener(itemEvent -> jTextPane.setText(""));
 
-        exit.addActionListener(actionEvent -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
+        exit.addActionListener(actionEvent -> dispose());
 
         outputSetting.addActionListener(actionEvent -> WindowManager.createAndDisplayOutputSettingForm());
 
@@ -110,7 +111,11 @@ public class MainForm extends JFrame {
 
         pluginList.addActionListener(actionEvent -> WindowManager.createAndDisplayPluginListDialog());
 
-        reload.addActionListener(actionEvent -> PluginManager.reloadPlugins());
+        reload.addActionListener(actionEvent -> {
+            clearPluginConfigMenu();
+            DanMuJi.reloadPlugins();
+            addPluginConfigMenuItems(DanMuJi.generatePluginConfigMenuItems());
+        });
 
         checkUpdates.addActionListener(actionEvent -> {
             try {
@@ -148,29 +153,21 @@ public class MainForm extends JFrame {
 
         startButton.addActionListener(actionEvent -> {
             DanMuJi.setUserWantDisconnect(false);
+            config.roomId = roomURLTextField.getText();
             try {
                 String roomURL = BILIBILI_LIVE_URL_PREFIX + roomURLTextField.getText();
+                LiveDanMuSender liveDanMuSender = new LiveDanMuSender(roomURL);
+                if (config.cookies != null && !config.cookies.equals("")) {
+                    liveDanMuSender.setCookies(config.cookies);
+                }
+                DanMuJi.setLiveDanMuSender(liveDanMuSender);
                 DanMuJi.setLiveDanMuReceiver(
                         new LiveDanMuReceiver(roomURL)
                                 .setPrintDebugInfo(config.debug)
                                 .addCallback(new LiveDanMuCallback())
                                 .connect()
                 );
-                LiveDanMuSender liveDanMuSender = new LiveDanMuSender(roomURL);
-                if (config.cookies != null && !config.cookies.equals("")) {
-                    liveDanMuSender.setCookies(config.cookies);
-                }
-                DanMuJi.setLiveDanMuSender(liveDanMuSender);
-                PluginManager.getPluginList().forEach(plugin -> {
-                    try {
-                        plugin.onStart();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-                danMuSendingThreads = new Vector<>();
             } catch (IOException | IllegalArgumentException e) {
-                onDisconnect();
                 printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 printInfo("Connect failed!");
                 e.printStackTrace();
@@ -187,14 +184,6 @@ public class MainForm extends JFrame {
                 printInfo("Cannot close connection, restart program may solve this problem.");
                 e.printStackTrace();
             }
-            PluginManager.getPluginList().forEach(plugin -> {
-                try {
-                    plugin.onStop();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            stopAllDanMuSendingThreads();
         });
 
         sendTextField.addKeyListener(new KeyAdapter() {
@@ -227,7 +216,6 @@ public class MainForm extends JFrame {
             }
             sendTextField.setText("");
             new Thread(() -> {
-                danMuSendingThreads.add(Thread.currentThread());
                 try {
                     DanMuResponseEntity danMuResponseEntity = DanMuJi.getLiveDanMuSender().send(message);
                     switch (danMuResponseEntity.code) {
@@ -256,28 +244,8 @@ public class MainForm extends JFrame {
                         printInfo("Send bullet screen failed!");
                         e.printStackTrace();
                     }
-                } finally {
-                    danMuSendingThreads.remove(Thread.currentThread());
                 }
             }).start();
-        });
-
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent windowEvent) {
-                config.roomId = roomURLTextField.getText();
-                PluginManager.unloadPlugins();
-                config.storeToFile();
-                LiveDanMuReceiver liveDanMuReceiver = DanMuJi.getLiveDanMuReceiver();
-                if (liveDanMuReceiver != null) {
-                    try {
-                        DanMuJi.getLiveDanMuReceiver().close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                stopAllDanMuSendingThreads();
-            }
         });
 
         //加载文字设置
@@ -289,16 +257,6 @@ public class MainForm extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         pack();
-    }
-
-    private void stopAllDanMuSendingThreads() {
-        danMuSendingThreads.forEach(thread -> {
-            try {
-                thread.interrupt();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
     }
 
     public void printInfo(String info, Object... objects) {
@@ -331,6 +289,7 @@ public class MainForm extends JFrame {
         stopButton.setEnabled(true);
         sendButton.setEnabled(true);
         sendTextField.requestFocus();
+        DanMuJi.getPluginManager().getExtensions(DanMuJiAction.class).forEach(DanMuJiAction::connect);
     }
 
     public void onDisconnect() {
@@ -341,6 +300,7 @@ public class MainForm extends JFrame {
         startButton.setEnabled(true);
         sendButton.setEnabled(false);
         setTitle(FORM_TITLE);
+        DanMuJi.getPluginManager().getExtensions(DanMuJiAction.class).forEach(DanMuJiAction::disconnect);
     }
 
     public void reloadStyle() {
@@ -360,12 +320,16 @@ public class MainForm extends JFrame {
                 });
     }
 
-    public StyledDocument getStyledDocument() {
-        return styledDocument;
+    public void addPluginConfigMenuItems(List<JMenuItem> jMenuItems) {
+        jMenuItems.forEach(pluginConfigMenu::add);
+        if (pluginConfigMenu.getItemCount() > 0) {
+            pluginConfigMenu.setEnabled(true);
+        }
     }
 
-    public JMenu getPluginConfigMenu() {
-        return pluginConfigMenu;
+    private void clearPluginConfigMenu() {
+        pluginConfigMenu.removeAll();
+        pluginConfigMenu.setEnabled(false);
     }
 
     /**

@@ -2,6 +2,8 @@ package com.hiczp.bilibili.live.danmuji;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
+import com.hiczp.bilibili.live.danmu.api.LiveDanMuReceiver;
+import com.hiczp.bilibili.live.danmuji.ui.MainForm;
 
 import javax.swing.*;
 import java.io.File;
@@ -46,13 +48,33 @@ public class Main {
             }
         }
 
-        //创建主窗体
-        WindowManager.createMainForm();
+        //设定程序退出时执行的步骤
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Closing DanMuJi...");
+            DanMuJi.setUserWantDisconnect(true);
+            LiveDanMuReceiver liveDanMuReceiver = DanMuJi.getLiveDanMuReceiver();
+            if (liveDanMuReceiver != null) {
+                System.out.println("Closing connection!");
+                try {
+                    liveDanMuReceiver.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    liveDanMuReceiver.waitUntilCallbackDispatchThreadExit();
+                }
+            }
+            DanMuJi.stopPlugins();
+            DanMuJi.getConfig().storeToFile();
+        }));
 
         //加载插件
-        PluginManager.loadPlugins();
+        DanMuJi.reloadPlugins();
 
+        //创建主窗体
+        MainForm mainForm = WindowManager.createMainForm();
+        //向主窗体添加插件菜单
+        mainForm.addPluginConfigMenuItems(DanMuJi.generatePluginConfigMenuItems());
         //显示主窗体
-        WindowManager.getMainForm().setVisible(true);
+        mainForm.setVisible(true);
     }
 }

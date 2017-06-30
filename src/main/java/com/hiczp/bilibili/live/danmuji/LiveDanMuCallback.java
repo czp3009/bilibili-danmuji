@@ -13,10 +13,13 @@ import java.util.Date;
 public class LiveDanMuCallback implements ILiveDanMuCallback {
     private MainForm mainForm = WindowManager.getMainForm();
     private Config config = DanMuJi.getConfig();
+    private boolean isReconnection = false;
 
     @Override
     public void onConnect() {
-        mainForm.onConnect();
+        if (!isReconnection) {
+            mainForm.onConnect();
+        }
         if (config.Connect.on) {
             mainForm.printMessage("ConnectStyle",
                     "[%s] Connect succeed!", new Date());
@@ -33,6 +36,7 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
             }
         } else {
             mainForm.printInfo("Reconnecting...");
+            isReconnection = true;
             try {
                 DanMuJi.getLiveDanMuReceiver().connect();
             } catch (IOException e) {
@@ -40,6 +44,8 @@ public class LiveDanMuCallback implements ILiveDanMuCallback {
                 mainForm.printInfo("%s: %s", e.getClass().getName(), e.getMessage());
                 mainForm.printInfo("Abort operation.");
                 e.printStackTrace();
+            } finally {
+                isReconnection = false;
             }
         }
     }
