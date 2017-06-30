@@ -8,9 +8,6 @@
     <artifactId>bilibili-live-danmuji</artifactId>
     <packaging>pom</packaging>
     <version>2.1.0</version>
-    <modules>
-        <module>test-plugin</module>
-    </modules>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
