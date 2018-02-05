@@ -1,5 +1,4 @@
+/.gradle
 /.idea
-/target
 /out
-/config.json
-/plugins
+/target

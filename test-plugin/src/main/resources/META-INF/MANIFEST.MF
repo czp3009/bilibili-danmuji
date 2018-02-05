@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-Plugin-Class: com.hiczp.bilibili.live.danmuji.plugin.test.Main
-Plugin-Id: test-plugin
-Plugin-Provider: czp
-Plugin-Version: 0.0.1

@@ -1,0 +1,7 @@
+group 'com.hiczp'
+version '0.0.1'
+description = 'Bilibili DanMuJi written in Java'
+
+dependencies {
+
+}
