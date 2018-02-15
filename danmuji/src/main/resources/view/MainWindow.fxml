@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="600.0"
+            stylesheets="/css/application.css, /css/main_window.css" xmlns="http://javafx.com/javafx/8.0.121"
+            fx:controller="com.hiczp.bilibili.danmuji.controller.MainWindowController">
+    <top>
+        <MenuBar useSystemMenuBar="true" BorderPane.alignment="CENTER">
+            <Menu mnemonicParsing="false" text="%menu.file">
+                <MenuItem mnemonicParsing="false" text="%menu.file.exit"/>
+            </Menu>
+            <Menu mnemonicParsing="false" text="%menu.help">
+                <MenuItem mnemonicParsing="false" text="%menu.help.about"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <BorderPane BorderPane.alignment="CENTER">
+            <top>
+                <VBox BorderPane.alignment="CENTER">
+                    <HBox alignment="CENTER_LEFT" spacing="20"
+                          style="-fx-border-width: 0 0 1 0;-fx-border-color:#BDBDBD" styleClass="padding5">
+                        <Label text="%label.liveRoomURL"/>
+                        <HBox alignment="CENTER_LEFT" spacing="1">
+                            <Label text="https://live.bilibili.com/"/>
+                            <JFXTextField/>
+                        </HBox>
+                        <HBox spacing="10">
+                            <JFXButton fx:id="connectButton" style="-fx-text-fill:WHITE;-fx-background-color:#5264AE"
+                                       text="%button.connect"/>
+                            <JFXButton fx:id="disconnectButton" disable="true"
+                                       style="-fx-text-fill:WHITE;-fx-background-color:#f44336"
+                                       text="%button.disconnect"/>
+                        </HBox>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="20"
+                          style="-fx-border-width: 0 0 1 0;-fx-border-color:#BDBDBD" styleClass="padding5">
+                        <HBox>
+                            <Label text="%label.roomStatus"/>
+                            <Label text="null"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="%label.popularity"/>
+                            <Label text="null"/>
+                        </HBox>
+                        <HBox>
+                            <Label text="%label.followCount"/>
+                            <Label text="null"/>
+                        </HBox>
+                    </HBox>
+                </VBox>
+            </top>
+            <center>
+                <TextFlow fx:id="textFlow"
+                          style="-fx-background-color: #EEEEEE;-fx-border-width: 1 0 0 0;-fx-border-color: #E0E0E0"
+                          styleClass="padding5" BorderPane.alignment="CENTER"/>
+            </center>
+            <bottom>
+                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding5" BorderPane.alignment="CENTER">
+                    <JFXTextField prefWidth="300" promptText="%prompt.inputBulletScreen"
+                                  style="-fx-prompt-text-fill: #F48FB1"/>
+                    <JFXButton fx:id="sendButton" text="%button.send"
+                               style="-fx-text-fill:WHITE;-fx-background-color: #F06292"/>
+                </HBox>
+            </bottom>
+        </BorderPane>
+    </center>
+</BorderPane>

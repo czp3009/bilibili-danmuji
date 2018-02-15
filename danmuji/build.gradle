@@ -1,7 +1,10 @@
 group 'com.hiczp'
-version '0.0.1'
+version '3.0.0'
 description = 'Bilibili DanMuJi written in Java'
 
 dependencies {
-
+    // https://mvnrepository.com/artifact/com.hiczp/bilibili-api
+    compile group: 'com.hiczp', name: 'bilibili-api', version: '0.0.4'
+    // https://mvnrepository.com/artifact/com.jfoenix/jfoenix
+    compile group: 'com.jfoenix', name: 'jfoenix', version: '8.0.2'
 }
