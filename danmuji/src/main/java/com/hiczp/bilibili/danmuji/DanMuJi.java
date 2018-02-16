@@ -12,17 +12,10 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class DanMuJi extends Application {
+    private static final String DANMUJI_TITLE = "Bilibili DanMuJi";
     private static DanMuJi danMuJi;
     private Status status = Status.STARTING;
     private Config config;
-
-    private static void showReportingDialog(Thread thread, Throwable throwable) {
-
-    }
-
-    static void run(String[] args) {
-        launch(args);
-    }
 
     public static DanMuJi getDanMuJi() {
         return danMuJi;
@@ -30,9 +23,6 @@ public class DanMuJi extends Application {
 
     @Override
     public void init() throws Exception {
-        //崩溃报告
-        Thread.setDefaultUncaughtExceptionHandler(DanMuJi::showReportingDialog);
-
         danMuJi = this;
         config = Configs.loadConfig();
 
@@ -41,11 +31,11 @@ public class DanMuJi extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle(DANMUJI_TITLE);
         FXMLLoader fxmlLoader = new FXMLLoader(
                 DanMuJi.class.getResource("/view/MainWindow.fxml"),
                 ResourceBundle.getBundle("bundle.MainWindow", Locale.getDefault(), UTF8Control.getInstance())
         );
-
         primaryStage.setScene(new Scene(fxmlLoader.load()));
         primaryStage.show();
     }
