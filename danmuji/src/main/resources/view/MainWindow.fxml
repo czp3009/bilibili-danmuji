@@ -22,7 +22,7 @@
             <top>
                 <VBox BorderPane.alignment="CENTER">
                     <HBox alignment="CENTER_LEFT" spacing="20"
-                          style="-fx-border-width: 0 0 1 0;-fx-border-color:#BDBDBD" styleClass="padding5">
+                          style="-fx-border-width: 0 0 1 0;-fx-border-color:#E0E0E0" styleClass="padding5">
                         <Label text="%label.liveRoomURL"/>
                         <HBox alignment="CENTER_LEFT" spacing="1">
                             <Label text="https://live.bilibili.com/"/>
@@ -58,14 +58,14 @@
                           style="-fx-background-color: #EEEEEE;-fx-border-width: 1 0 0 0;-fx-border-color: #E0E0E0"
                           styleClass="padding5" BorderPane.alignment="CENTER"/>
             </center>
-            <bottom>
-                <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding5" BorderPane.alignment="CENTER">
-                    <JFXTextField prefWidth="300" promptText="%prompt.inputBulletScreen"
-                                  style="-fx-prompt-text-fill: #F48FB1"/>
-                    <JFXButton fx:id="sendButton" text="%button.send"
-                               style="-fx-text-fill:WHITE;-fx-background-color: #F06292"/>
-                </HBox>
-            </bottom>
         </BorderPane>
     </center>
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding5" BorderPane.alignment="CENTER">
+            <JFXTextField prefWidth="300" promptText="%prompt.inputBulletScreen"
+                          style="-fx-prompt-text-fill: #F48FB1"/>
+            <JFXButton fx:id="sendButton" text="%button.send"
+                       style="-fx-text-fill:WHITE;-fx-background-color: #F06292"/>
+        </HBox>
+    </bottom>
 </BorderPane>
