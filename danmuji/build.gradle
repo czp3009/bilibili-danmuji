@@ -7,4 +7,6 @@ dependencies {
     compile group: 'com.hiczp', name: 'bilibili-api', version: '0.0.4'
     // https://mvnrepository.com/artifact/com.jfoenix/jfoenix
     compile group: 'com.jfoenix', name: 'jfoenix', version: '8.0.2'
+    // https://mvnrepository.com/artifact/org.hildan.fxgson/fx-gson
+    compile group: 'org.hildan.fxgson', name: 'fx-gson', version: '3.1.0'
 }

@@ -1,7 +1,7 @@
 package com.hiczp.bilibili.danmuji.config;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.hildan.fxgson.FxGsonBuilder;
 
 import javax.annotation.Nonnull;
 import java.io.BufferedReader;
@@ -11,11 +11,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 
 public class Configs {
     private static final Path CONFIG_FILE_PATH = Paths.get("config.json");
-    private static final Gson GSON = new GsonBuilder().serializeNulls().setPrettyPrinting().create();
+    private static final Gson GSON =
+            new FxGsonBuilder()
+                    .acceptNullPrimitives()
+                    .acceptNullProperties()
+                    .builder()
+                    .serializeNulls()
+                    .setPrettyPrinting()
+                    .create();
 
     private static Config readConfigFromDisk() throws IOException {
         if (!Files.exists(CONFIG_FILE_PATH)) {
@@ -27,7 +33,8 @@ public class Configs {
     }
 
     public static Config loadConfig() throws IOException {
-        return readConfigFromDisk();
+        Config config = readConfigFromDisk();
+        return config != null ? config : new Config();
     }
 
     public static Config resetConfig() throws IOException {
@@ -36,7 +43,6 @@ public class Configs {
     }
 
     public static void writeConfigToDisk(@Nonnull Config config) throws IOException {
-        Objects.requireNonNull(config);
         try (BufferedWriter bufferedWriter = Files.newBufferedWriter(CONFIG_FILE_PATH, StandardCharsets.UTF_8)) {
             bufferedWriter.write(GSON.toJson(config));
         }

@@ -1,5 +1,7 @@
 package com.hiczp.bilibili.danmuji.config;
 
+import javafx.beans.property.SimpleIntegerProperty;
+
 public class Config {
-    public Long latestEnterRoomId;
+    public SimpleIntegerProperty latestEnterRoomId = new SimpleIntegerProperty();
 }

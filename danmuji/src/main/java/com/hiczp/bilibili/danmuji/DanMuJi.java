@@ -1,5 +1,6 @@
 package com.hiczp.bilibili.danmuji;
 
+import com.google.common.eventbus.EventBus;
 import com.hiczp.bilibili.danmuji.bundle.UTF8Control;
 import com.hiczp.bilibili.danmuji.config.Config;
 import com.hiczp.bilibili.danmuji.config.Configs;
@@ -14,6 +15,7 @@ import java.util.ResourceBundle;
 public class DanMuJi extends Application {
     private static final String DANMUJI_TITLE = "Bilibili DanMuJi";
     private static DanMuJi danMuJi;
+    private EventBus eventBus = new EventBus("DanMuJiEventBus");
     private Status status = Status.STARTING;
     private Config config;
 
@@ -43,7 +45,12 @@ public class DanMuJi extends Application {
     @Override
     public void stop() throws Exception {
         status = Status.CLOSING;
+
         Configs.writeConfigToDisk(config);
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     public Status getStatus() {

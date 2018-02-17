@@ -61,7 +61,7 @@
         </BorderPane>
     </center>
     <bottom>
-        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding5" BorderPane.alignment="CENTER">
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding5" BorderPane.alignment="CENTER" disable="true">
             <JFXTextField prefWidth="300" promptText="%prompt.inputBulletScreen"
                           style="-fx-prompt-text-fill: #F48FB1"/>
             <JFXButton fx:id="sendButton" text="%button.send"
