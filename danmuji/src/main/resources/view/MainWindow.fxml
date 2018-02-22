@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="600.0"
-            stylesheets="/css/application.css, /css/main_window.css" xmlns="http://javafx.com/javafx/8.0.121"
+            stylesheets="/css/application.css" xmlns="http://javafx.com/javafx/8.0.121"
             fx:controller="com.hiczp.bilibili.danmuji.controller.MainWindowController">
     <top>
         <MenuBar useSystemMenuBar="true" BorderPane.alignment="CENTER">
