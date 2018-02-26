@@ -4,9 +4,22 @@ description = 'Bilibili DanMuJi written in Java'
 
 dependencies {
     // https://mvnrepository.com/artifact/com.hiczp/bilibili-api
-    compile group: 'com.hiczp', name: 'bilibili-api', version: '0.0.4'
+    compile group: 'com.hiczp', name: 'bilibili-api', version: '0.0.5'
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
     // https://mvnrepository.com/artifact/com.jfoenix/jfoenix
     compile group: 'com.jfoenix', name: 'jfoenix', version: '8.0.2'
     // https://mvnrepository.com/artifact/org.hildan.fxgson/fx-gson
     compile group: 'org.hildan.fxgson', name: 'fx-gson', version: '3.1.0'
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Version': version,
+                "Main-Class": "com.hiczp.bilibili.danmuji.Main"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

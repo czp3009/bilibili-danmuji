@@ -10,7 +10,7 @@
     <top>
         <MenuBar useSystemMenuBar="true" BorderPane.alignment="CENTER">
             <Menu mnemonicParsing="false" text="%menu.file">
-                <MenuItem mnemonicParsing="false" text="%menu.file.exit"/>
+                <MenuItem onAction="#exit" text="%menu.file.exit"/>
             </Menu>
             <Menu mnemonicParsing="false" text="%menu.help">
                 <MenuItem mnemonicParsing="false" text="%menu.help.about"/>
@@ -26,12 +26,12 @@
                         <Label text="%label.liveRoomURL"/>
                         <HBox alignment="CENTER_LEFT" spacing="1">
                             <Label text="https://live.bilibili.com/"/>
-                            <JFXTextField/>
+                            <JFXTextField fx:id="roomIdTextField"/>
                         </HBox>
-                        <HBox spacing="10">
-                            <JFXButton fx:id="connectButton" style="-fx-text-fill:WHITE;-fx-background-color:#5264AE"
-                                       text="%button.connect"/>
-                            <JFXButton fx:id="disconnectButton" disable="true"
+                        <HBox fx:id="connectionButtonsHBox" disable="true" spacing="10">
+                            <JFXButton fx:id="connectButton" onAction="#connect"
+                                       style="-fx-text-fill:WHITE;-fx-background-color:#5264AE" text="%button.connect"/>
+                            <JFXButton fx:id="disconnectButton" disable="true" onAction="#disconnect"
                                        style="-fx-text-fill:WHITE;-fx-background-color:#f44336"
                                        text="%button.disconnect"/>
                         </HBox>
@@ -40,32 +40,33 @@
                           style="-fx-border-width: 0 0 1 0;-fx-border-color:#BDBDBD" styleClass="padding5">
                         <HBox>
                             <Label text="%label.roomStatus"/>
-                            <Label text="null"/>
+                            <Label fx:id="roomStatusLabel" text="null"/>
                         </HBox>
                         <HBox>
                             <Label text="%label.popularity"/>
-                            <Label text="null"/>
+                            <Label fx:id="popularityLabel" text="null"/>
                         </HBox>
                         <HBox>
                             <Label text="%label.followCount"/>
-                            <Label text="null"/>
+                            <Label fx:id="followCountLabel" text="null"/>
                         </HBox>
                     </HBox>
                 </VBox>
             </top>
             <center>
-                <TextFlow fx:id="textFlow"
-                          style="-fx-background-color: #EEEEEE;-fx-border-width: 1 0 0 0;-fx-border-color: #E0E0E0"
-                          styleClass="padding5" BorderPane.alignment="CENTER"/>
+                <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-padding: 0 5 0 5">
+                    <TextFlow fx:id="textFlow"/>
+                </ScrollPane>
             </center>
         </BorderPane>
     </center>
     <bottom>
-        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="padding5" BorderPane.alignment="CENTER" disable="true">
-            <JFXTextField prefWidth="300" promptText="%prompt.inputBulletScreen"
+        <HBox fx:id="sendingBulletScreenHBox" alignment="CENTER_LEFT" disable="true" spacing="10" styleClass="padding5"
+              BorderPane.alignment="CENTER">
+            <JFXTextField fx:id="inputBulletScreenTextField" prefWidth="300" promptText="%prompt.inputBulletScreen"
                           style="-fx-prompt-text-fill: #F48FB1"/>
-            <JFXButton fx:id="sendButton" text="%button.send"
-                       style="-fx-text-fill:WHITE;-fx-background-color: #F06292"/>
+            <JFXButton fx:id="sendButton" style="-fx-text-fill:WHITE;-fx-background-color: #F06292" text="%button.send"
+                       disable="true"/>
         </HBox>
     </bottom>
 </BorderPane>
