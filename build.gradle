@@ -1,9 +1,38 @@
-subprojects {
-    apply plugin: 'idea'
-    apply plugin: 'java'
-    sourceCompatibility = 1.8
+buildscript {
+    ext {
+        kotlin_version = '1.3.10'
+        jvm_target_version=JavaVersion.VERSION_1_8
+    }
 
     repositories {
         mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+group 'com.hiczp'
+version '3.0'
+
+subprojects {
+    apply plugin: 'kotlin'
+
+    repositories {
+        mavenCentral()
+    }
+
+    //kotlin
+    dependencies {
+        compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+        compile 'org.jetbrains.kotlin:kotlin-reflect'
+    }
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = jvm_target_version
+    }
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = jvm_target_version
     }
 }
